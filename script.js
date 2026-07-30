@@ -45,7 +45,6 @@ const CONTENT = {
       { label: "Contacto", href: "#contact" },
     ],
     hero: {
-      eyebrow: "Estudiante de ADSO",
       title: "Construyo bases web con foco en claridad.",
       summary: "Aporto orden, aprendizaje y una base técnica que sigue creciendo.",
       copy:
@@ -232,7 +231,6 @@ const CONTENT = {
       { label: "Contact", href: "#contact" },
     ],
     hero: {
-      eyebrow: "ADSO student",
       title: "I build web foundations with clarity in mind.",
       summary: "I bring structure, learning, and a technical base that keeps growing.",
       copy:
@@ -598,8 +596,6 @@ function render() {
         <section class="hero" id="home">
           <div class="shell hero__grid">
             <article class="hero__copy reveal">
-              <div class="eyebrow">${copy.hero.eyebrow}</div>
-              <p class="hero__identity">${PROFILE.name}</p>
               <h1 class="hero__headline">${copy.hero.title}</h1>
               <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
               <p class="hero__lede">${copy.hero.summary}</p>
