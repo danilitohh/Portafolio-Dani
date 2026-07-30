@@ -568,6 +568,8 @@ let portraitSwingState = {
   velocity: 0,
   lastFrameTime: 0,
   lastMoveTime: 0,
+  dragStartX: 0,
+  dragStartAngle: -1.35,
 };
 
 function prefersReducedMotion() {
@@ -741,13 +743,10 @@ function startPortraitDrag(root, pointerId, clientX) {
   portraitSwingState.root = root;
   portraitSwingState.dragging = true;
   portraitSwingState.pointerId = pointerId;
+  portraitSwingState.dragStartX = clientX;
+  portraitSwingState.dragStartAngle = portraitSwingState.angle;
   portraitSwingState.lastMoveTime = performance.now();
   portraitSwingState.velocity = 0;
-
-  const rect = root.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const normalized = clampNumber((clientX - centerX) / Math.max(rect.width / 2, 1), -1, 1);
-  portraitSwingState.angle = clampNumber(normalized * 8.5, -10.5, 10.5);
   root.classList.add("is-dragging");
   applyPortraitSwing();
   ensurePortraitSwingFrame();
@@ -803,10 +802,8 @@ function handlePortraitPointerMove(event) {
     return;
   }
 
-  const rect = root.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const normalized = clampNumber((event.clientX - centerX) / Math.max(rect.width / 2, 1), -1, 1);
-  const nextAngle = clampNumber(normalized * 8.5, -10.5, 10.5);
+  const deltaX = event.clientX - portraitSwingState.dragStartX;
+  const nextAngle = clampNumber(portraitSwingState.dragStartAngle + deltaX * 0.085, -10.5, 10.5);
   const now = performance.now();
   const delta = Math.max(now - portraitSwingState.lastMoveTime, 16);
 
