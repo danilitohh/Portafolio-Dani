@@ -3064,7 +3064,7 @@ body[data-preview-section="contact"] .footer {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
   gap: clamp(1.5rem, 4vw, 4rem);
-  align-items: center;
+  align-items: start;
 }
 
 .hero__content {
@@ -3257,7 +3257,11 @@ body[data-preview-section="contact"] .footer {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  padding-top: 1.5rem;
+  padding-top: 0.5rem;
+}
+
+.portrait--hero {
+  margin-top: clamp(-2rem, -2vw, -0.9rem);
 }
 
 .portrait {
@@ -4211,6 +4215,10 @@ body[data-preview-section="contact"] .footer {
   .portrait {
     width: min(100%, 15.5rem);
     cursor: default;
+  }
+
+  .portrait--hero {
+    margin-top: 0;
   }
 
   .portrait.is-dragging {
