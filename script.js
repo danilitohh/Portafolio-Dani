@@ -91,11 +91,11 @@ const CONTENT = {
         },
         {
           title: "Pensamiento práctico",
-          text: "Me apoyo en el orden, la documentación y la coordinación para resolver problemas con criterio.",
+          text: "Me apoyo en el orden, la documentación técnica y el análisis para resolver problemas con criterio.",
         },
         {
           title: "Trabajo con personas",
-          text: "La experiencia en operaciones, documentación y reclutamiento fortaleció mi comunicación y seguimiento.",
+          text: "Trabajar con personas me ayuda a entender necesidades, comunicar avances y construir soluciones claras.",
         },
       ],
     },
@@ -209,10 +209,10 @@ const CONTENT = {
       ],
     },
     journey: {
-      kicker: "Formación y experiencia",
-      title: "Experiencia laboral y formación que fortalecen mi perfil.",
+      kicker: "Formación",
+      title: "Formación en desarrollo y sistemas.",
       copy:
-        "Mi recorrido combina estudios en ADSO con experiencia previa en coordinación, documentación y reclutamiento, habilidades que ayudan a trabajar con orden y comunicación.",
+        "Mi recorrido combina ADSO y técnica en sistemas, con enfoque en desarrollo de software, programación, bases de datos y construcción de aplicaciones.",
       items: [
         {
           year: "2025 - actualidad",
@@ -223,16 +223,6 @@ const CONTENT = {
           year: "2017",
           title: "Técnica en Sistemas - SENA",
           text: "Base técnica inicial en sistemas y soporte a la infraestructura de trabajo.",
-        },
-        {
-          year: "Ago 2024 - May 2025",
-          title: "Coordinador Logístico - Leangroup Solutions",
-          text: "Generación de propuestas, estimados, calendarios y seguimiento de proyectos, además de apoyo en comunicación con clientes y documentación operativa.",
-        },
-        {
-          year: "2020 - 2024",
-          title: "Reclutador - HP Service Americas BPS / Manpower Group / UPS",
-          text: "Monitoreo de sistemas, reportes, registros digitales, seguimiento y búsqueda de candidatos para ofertas.",
         },
       ],
     },
@@ -316,11 +306,11 @@ const CONTENT = {
         },
         {
           title: "Practical thinking",
-          text: "I rely on order, documentation, and coordination to solve problems with judgment.",
+          text: "I rely on organization, technical documentation, and analysis to solve problems with judgment.",
         },
         {
           title: "Working with people",
-          text: "Experience in operations, documentation, and recruiting strengthened my communication and follow-up.",
+          text: "Working with people helps me understand needs, communicate progress, and build clear solutions.",
         },
       ],
     },
@@ -434,10 +424,10 @@ const CONTENT = {
       ],
     },
     journey: {
-      kicker: "Education and experience",
-      title: "Work experience and education that strengthen my profile.",
+      kicker: "Education",
+      title: "Education in development and systems.",
       copy:
-        "My path combines ADSO studies with prior experience in coordination, documentation, and recruiting, skills that support clear communication and organized work.",
+        "My path combines ADSO and systems training, with a focus on software development, programming, databases, and application building.",
       items: [
         {
           year: "2025 - present",
@@ -448,16 +438,6 @@ const CONTENT = {
           year: "2017",
           title: "Systems Technician - SENA",
           text: "Initial technical foundation in systems and workplace support.",
-        },
-        {
-          year: "Aug 2024 - May 2025",
-          title: "Logistics Coordinator - Leangroup Solutions",
-          text: "Prepared proposals, estimates, schedules, and project follow-up, while supporting client communication and operational documentation.",
-        },
-        {
-          year: "2020 - 2024",
-          title: "Recruiter - HP Service Americas BPS / Manpower Group / UPS",
-          text: "Monitored systems, generated reports, maintained digital records, followed up on processes, and sourced candidates for openings.",
         },
       ],
     },
