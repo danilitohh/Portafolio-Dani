@@ -89,12 +89,18 @@ const CONTENT = {
       kicker: "Proyectos",
       title: "Muestra tu trabajo con tarjetas listas para crecer.",
       copy:
-        "Cada tarjeta está pensada para que cambies nombre, descripción, tecnologías y enlaces sin tocar la estructura general. Puedes duplicarlas o reducirlas según tu experiencia.",
+        "Cada tarjeta está pensada para que cambies imagen, nombre, descripción, tecnologías y enlace de GitHub sin tocar la estructura general. Puedes duplicarlas o reducirlas según tu experiencia.",
+      repoCta: "Ver repositorio",
+      imageFallbackTitle: "Agrega una imagen",
+      imageFallbackText: "Usa una ruta como assets/projects/proyecto-01.jpg o un PNG/SVG local.",
       items: [
         {
           index: "01",
           type: "Proyecto destacado",
           title: "Nombre del proyecto",
+          image: "",
+          imageAlt: "Vista previa del proyecto destacado",
+          repoUrl: "https://github.com/tu-usuario/proyecto-01",
           summary:
             "Describe el problema, tu rol, el proceso y el resultado. Puedes añadir aquí una frase corta con el impacto o el objetivo principal.",
           tags: ["JavaScript", "UI", "Responsive"],
@@ -104,6 +110,9 @@ const CONTENT = {
           index: "02",
           type: "Landing / Producto",
           title: "Nombre del producto",
+          image: "",
+          imageAlt: "Vista previa del producto",
+          repoUrl: "https://github.com/tu-usuario/proyecto-02",
           summary:
             "Usa esta tarjeta para proyectos de marketing, dashboards, apps internas, sitios corporativos o cualquier idea visual que quieras destacar.",
           tags: ["Motion", "Design system", "Accessibility"],
@@ -113,6 +122,9 @@ const CONTENT = {
           index: "03",
           type: "Experimento / Idea",
           title: "Nombre del experimento",
+          image: "",
+          imageAlt: "Vista previa del experimento",
+          repoUrl: "https://github.com/tu-usuario/proyecto-03",
           summary:
             "Perfecta para demostrar iteración, pruebas visuales o proyectos personales que muestran tu forma de explorar y aprender.",
           tags: ["Animation", "API", "Creative coding"],
@@ -240,12 +252,18 @@ const CONTENT = {
       kicker: "Projects",
       title: "Show your work with cards ready to grow.",
       copy:
-        "Each card is built so you can change the name, description, technologies, and links without touching the overall structure. Duplicate or trim them based on your experience.",
+        "Each card is built so you can change the image, name, description, technologies, and GitHub link without touching the overall structure. Duplicate or trim them based on your experience.",
+      repoCta: "View repository",
+      imageFallbackTitle: "Add an image",
+      imageFallbackText: "Use a path like assets/projects/project-01.jpg or a local PNG/SVG.",
       items: [
         {
           index: "01",
           type: "Featured project",
           title: "Project name",
+          image: "",
+          imageAlt: "Featured project preview",
+          repoUrl: "https://github.com/tu-usuario/proyecto-01",
           summary:
             "Describe the problem, your role, the process, and the result. You can add one short sentence about impact or the main goal.",
           tags: ["JavaScript", "UI", "Responsive"],
@@ -255,6 +273,9 @@ const CONTENT = {
           index: "02",
           type: "Landing / Product",
           title: "Product name",
+          image: "",
+          imageAlt: "Product preview",
+          repoUrl: "https://github.com/tu-usuario/proyecto-02",
           summary:
             "Use this card for marketing sites, dashboards, internal tools, corporate pages, or any visual idea you want to highlight.",
           tags: ["Motion", "Design system", "Accessibility"],
@@ -264,6 +285,9 @@ const CONTENT = {
           index: "03",
           type: "Experiment / Idea",
           title: "Experiment name",
+          image: "",
+          imageAlt: "Experiment preview",
+          repoUrl: "https://github.com/tu-usuario/proyecto-03",
           summary:
             "Perfect for showing iteration, visual tests, or personal projects that reveal how you explore and learn.",
           tags: ["Animation", "API", "Creative coding"],
@@ -369,22 +393,48 @@ function createTag(tag) {
   return `<span class="tag">${tag}</span>`;
 }
 
-function createProjectCard(project) {
+function createProjectMedia(project, copy) {
+  if (project.image) {
+    return `
+      <div class="project-card__media">
+        <img class="project-card__image" src="${project.image}" alt="${project.imageAlt}" loading="lazy" />
+      </div>
+    `;
+  }
+
+  return `
+    <div class="project-card__media project-card__media--empty" aria-label="${project.imageAlt}">
+      <span class="project-card__placeholder-kicker">${project.type}</span>
+      <strong class="project-card__placeholder-title">${copy.projects.imageFallbackTitle}</strong>
+      <span class="project-card__placeholder-text">${copy.projects.imageFallbackText}</span>
+    </div>
+  `;
+}
+
+function createProjectCard(project, copy) {
+  const repoLink = project.repoUrl
+    ? `<a class="project-link" href="${project.repoUrl}" target="_blank" rel="noreferrer">${copy.projects.repoCta}</a>`
+    : "";
+
   return `
     <article class="project-card reveal">
-      <div class="project-card__head">
-        <div>
-          <p class="project-card__type">${project.type}</p>
-          <h3 class="card-title">${project.title}</h3>
+      ${createProjectMedia(project, copy)}
+      <div class="project-card__body">
+        <div class="project-card__head">
+          <div>
+            <p class="project-card__type">${project.type}</p>
+            <h3 class="card-title">${project.title}</h3>
+          </div>
+          <span class="project-card__index">${project.index}</span>
         </div>
-        <span class="project-card__index">${project.index}</span>
-      </div>
-      <p class="project-card__summary">${project.summary}</p>
-      <div class="chip-row">
-        ${project.tags.map(createTag).join("")}
-      </div>
-      <div class="project-card__footer">
-        <small>${project.footer}</small>
+        <p class="project-card__summary">${project.summary}</p>
+        <div class="chip-row">
+          ${project.tags.map(createTag).join("")}
+        </div>
+        <div class="project-card__footer">
+          <small>${project.footer}</small>
+          ${repoLink}
+        </div>
       </div>
     </article>
   `;
@@ -563,7 +613,7 @@ function render() {
             </div>
             <p class="section-copy">${copy.projects.copy}</p>
             <div class="grid-3" style="margin-top: 1.25rem;">
-              ${copy.projects.items.map(createProjectCard).join("")}
+              ${copy.projects.items.map((project) => createProjectCard(project, copy)).join("")}
             </div>
           </div>
         </section>

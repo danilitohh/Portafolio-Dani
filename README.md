@@ -19,7 +19,8 @@ Base de portafolio en JavaScript puro, pensada para mostrar:
 1. Edita el bloque `PROFILE` en `script.js`.
 2. Reemplaza los textos de `CONTENT.es` y `CONTENT.en`.
 3. Cambia los enlaces de GitHub, LinkedIn y correo.
-4. Ajusta colores, tarjetas y secciones en `styles.css`.
+4. En cada proyecto, rellena `image` con una ruta local como `assets/projects/proyecto-01.jpg` y `repoUrl` con el enlace real de GitHub.
+5. Ajusta colores, tarjetas y secciones en `styles.css`.
 
 ## Cómo abrirlo
 
@@ -32,6 +33,7 @@ Base de portafolio en JavaScript puro, pensada para mostrar:
 - El formulario de contacto abre el cliente de correo sin necesitar backend.
 - La estructura está pensada para que puedas mover o duplicar secciones sin romper el diseño.
 - No requiere Node ni dependencias para funcionar en esta base inicial.
+- Si dejas `image` vacío, la tarjeta mostrará un bloque guía hasta que subas tu captura.
 
 ## Remoto
 
