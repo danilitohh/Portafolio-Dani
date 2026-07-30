@@ -1,8 +1,9 @@
 const STORAGE_KEY = "portfolio-language";
 const SUPPORTED_LANGS = new Set(["es", "en"]);
-const APP_VERSION = "2026-07-30-2";
+const APP_VERSION = "2026-07-30-3";
 const INTRO_STORAGE_KEY = `portfolio-intro-seen-${APP_VERSION}`;
-const ACTIVE_SECTION_IDS = ["home", "about", "technologies", "projects", "experience", "contact"];
+const ACTIVE_SECTION_IDS = ["home", "about", "showcase", "contact"];
+const SHOWCASE_TABS = ["projects", "certificates", "technologies"];
 
 // Edita este bloque con tu información real cuando quieras personalizar el sitio.
 const PROFILE = {
@@ -48,6 +49,14 @@ function writeSessionFlag(key, value) {
   }
 }
 
+if (new URLSearchParams(location.search).has("resetIntro")) {
+  try {
+    sessionStorage.removeItem(INTRO_STORAGE_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
 const introSeenOnLoad = readSessionFlag(INTRO_STORAGE_KEY);
 
 const CONTENT = {
@@ -58,9 +67,7 @@ const CONTENT = {
     nav: [
       { label: "Inicio", href: "#home" },
       { label: "Sobre mí", href: "#about" },
-      { label: "Tecnologías", href: "#technologies" },
-      { label: "Proyectos", href: "#projects" },
-      { label: "Formación", href: "#experience" },
+      { label: "Portfolio", href: "#showcase" },
       { label: "Contacto", href: "#contact" },
     ],
     hero: {
@@ -119,6 +126,17 @@ const CONTENT = {
           text: "Trabajar con personas me ayuda a entender necesidades, comunicar avances y construir soluciones claras.",
         },
       ],
+    },
+    showcase: {
+      kicker: "Portfolio Showcase",
+      title: "Portfolio Showcase",
+      copy: "Una sola vista para explorar proyectos, certificados y tecnologías con una composición editorial limpia.",
+      tabs: {
+        projects: "Proyectos",
+        certificates: "Certificados",
+        technologies: "Tecnologías",
+      },
+      emptyCertificates: "Aún no tengo certificados cargados.",
     },
     projects: {
       kicker: "Proyectos",
@@ -273,9 +291,7 @@ const CONTENT = {
     nav: [
       { label: "Home", href: "#home" },
       { label: "About", href: "#about" },
-      { label: "Technologies", href: "#technologies" },
-      { label: "Projects", href: "#projects" },
-      { label: "Experience", href: "#experience" },
+      { label: "Portfolio", href: "#showcase" },
       { label: "Contact", href: "#contact" },
     ],
     hero: {
@@ -334,6 +350,17 @@ const CONTENT = {
           text: "Working with people helps me understand needs, communicate progress, and build clear solutions.",
         },
       ],
+    },
+    showcase: {
+      kicker: "Portfolio Showcase",
+      title: "Portfolio Showcase",
+      copy: "A single view to explore projects, certificates, and technologies in a clean editorial layout.",
+      tabs: {
+        projects: "Projects",
+        certificates: "Certificates",
+        technologies: "Technologies",
+      },
+      emptyCertificates: "I do not have certificates uploaded yet.",
     },
     projects: {
       kicker: "Projects",
@@ -490,6 +517,9 @@ const browserLang = navigator.language?.toLowerCase().startsWith("es") ? "es" : 
 let currentLang = SUPPORTED_LANGS.has(storedLang) ? storedLang : browserLang;
 let activeProjectIndex = null;
 let activeProjectImageIndex = 0;
+let activeShowcaseTab = SHOWCASE_TABS[0];
+let showcaseTransitionTimerId = 0;
+let previewScrollTimerId = 0;
 let pendingProjectFocusIndex = null;
 let appInteractionsBound = false;
 let pageRevealObserver = null;
@@ -504,6 +534,7 @@ let introState = {
   completed: introSeenOnLoad,
   overlay: null,
 };
+const PREVIEW_SECTION = new URLSearchParams(location.search).get("preview");
 let activeGlowCard = null;
 let waterCursorState = {
   initialized: false,
@@ -669,31 +700,7 @@ function removeWaterCursor() {
 }
 
 function spawnWaterRipple(x, y, size = 1) {
-  if (!waterCursorState.root) {
-    return;
-  }
-
-  const activeRipples = waterCursorState.root.querySelectorAll(".water-cursor__wave");
-  if (activeRipples.length >= 5) {
-    activeRipples[0].remove();
-  }
-
-  const ripple = document.createElement("span");
-  ripple.className = "water-cursor__wave";
-  ripple.style.left = `${x}px`;
-  ripple.style.top = `${y}px`;
-  const diameter = Math.max(24, 28 * size);
-  ripple.style.width = `${diameter}px`;
-  ripple.style.height = `${diameter}px`;
-
-  waterCursorState.root.appendChild(ripple);
-  ripple.addEventListener(
-    "animationend",
-    () => {
-      ripple.remove();
-    },
-    { once: true },
-  );
+  return;
 }
 
 function updateWaterCursorClasses(target) {
@@ -721,14 +728,6 @@ function handleWaterPointerMove(event) {
   updateAmbientLighting(event.clientX, event.clientY);
   syncGlowCard(event);
 
-  const moved = Math.hypot(event.clientX - waterCursorState.lastX, event.clientY - waterCursorState.lastY);
-  const now = performance.now();
-  if (moved > 16 && now - waterCursorState.lastRippleAt > 110) {
-    const intensity = Math.min(1.22, 0.88 + moved / 180);
-    spawnWaterRipple(event.clientX, event.clientY, intensity);
-    waterCursorState.lastRippleAt = now;
-  }
-
   waterCursorState.lastX = event.clientX;
   waterCursorState.lastY = event.clientY;
 
@@ -748,7 +747,6 @@ function handleWaterPointerDown(event) {
 
   waterCursorState.pressed = true;
   waterCursorState.root.classList.add("is-pressed");
-  spawnWaterRipple(event.clientX, event.clientY, 1.5);
 
   if (!waterCursorState.frameId) {
     waterCursorState.frameId = requestAnimationFrame(stepWaterCursor);
@@ -1096,23 +1094,486 @@ function createIntroOverlay() {
   }
 
   const introGreeting = currentLang === "es" ? "Hola" : "Hello";
-  const introTitle = currentLang === "es" ? "Bienvenido a mi portafolio" : "Welcome to my portfolio";
-  const introCopy =
-    currentLang === "es"
-      ? "Diseño, desarrollo y sistemas en un solo lugar."
-      : "Design, development, and systems in one place.";
+  const introTitleTop = currentLang === "es" ? "Bienvenido a mi" : "Welcome to my";
+  const introTitleBottom = currentLang === "es" ? "Portafolio Web" : "Web Portfolio";
 
   return `
-    <div class="page-intro" data-page-intro role="status" aria-live="polite" aria-label="${introTitle}">
-      <div class="page-intro__panel">
+    <div class="page-intro" data-page-intro role="status" aria-live="polite" aria-label="${introTitleTop} ${introTitleBottom}">
+      <div class="page-intro__lights" aria-hidden="true">
+        <span></span>
+        <span></span>
+      </div>
+      <div class="page-intro__content">
         <p class="page-intro__kicker">${introGreeting}</p>
-        <h2 class="page-intro__title">${introTitle}</h2>
-        <p class="page-intro__name">${PROFILE.name}</p>
-        <p class="page-intro__copy">${introCopy}</p>
+        <p class="page-intro__line">${introTitleTop}</p>
+        <p class="page-intro__line page-intro__line--strong">${introTitleBottom}</p>
         <div class="page-intro__bar" aria-hidden="true"><span></span></div>
       </div>
     </div>
   `;
+}
+
+function getHeroHeadlineLines() {
+  return currentLang === "es" ? ["Desarrollo", "de software"] : ["Software", "development"];
+}
+
+function getShowcaseLabel(copy, tab) {
+  return copy.showcase?.tabs?.[tab] || tab;
+}
+
+function getTechnologyItems(copy) {
+  return copy.skills.groups.flatMap((group) =>
+    group.items.map((item) => ({
+      name: item,
+      group: group.title,
+      badge: item
+        .replace(/[^A-Za-z0-9]/g, "")
+        .slice(0, 3)
+        .toUpperCase() || group.icon.slice(0, 3),
+    })),
+  );
+}
+
+function getProfileInitials() {
+  return PROFILE.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("")
+    .slice(0, 2);
+}
+
+function createMetricCard(label, value, detail, index = 0) {
+  return `
+    <article class="metric-card reveal reveal--up" style="--reveal-delay: ${16 + index * 20}ms">
+      <span class="metric-card__value">${value}</span>
+      <span class="metric-card__label">${label}</span>
+      <span class="metric-card__detail">${detail}</span>
+    </article>
+  `;
+}
+
+function createPortraitCard(variant = "hero") {
+  const initials = getProfileInitials();
+  const role = PROFILE.role[currentLang];
+
+  return `
+    <figure class="portrait portrait--${variant}" aria-label="${PROFILE.name}">
+      <span class="portrait__string"></span>
+      <span class="portrait__clip"></span>
+      <div class="portrait__frame">
+        <div class="portrait__art" aria-hidden="true">
+          <span class="portrait__initials">${initials}</span>
+        </div>
+        <figcaption class="portrait__caption">
+          <span>${PROFILE.name}</span>
+          <small>${role}</small>
+        </figcaption>
+      </div>
+    </figure>
+  `;
+}
+
+function createProjectShowcaseCard(project, copy, index = 0) {
+  const actionButtons = [];
+  if (project.liveUrl) {
+    actionButtons.push(`<a class="button button--secondary button--compact" href="${project.liveUrl}" target="_blank" rel="noreferrer">${copy.projects.liveCta}</a>`);
+  }
+  if (project.repoUrl) {
+    actionButtons.push(`<a class="button button--ghost button--compact" href="${project.repoUrl}" target="_blank" rel="noreferrer">${copy.projects.repoCta}</a>`);
+  }
+
+  return `
+      <article class="project-row reveal reveal--up" style="--reveal-delay: ${18 + index * 18}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
+        <div class="project-row__media">
+          <img class="project-row__image" src="${project.image}" alt="${project.imageAlt}" loading="eager" decoding="async" />
+        </div>
+      <div class="project-row__content">
+        <div class="project-row__header">
+          <div>
+            <p class="project-row__kicker">${project.type}</p>
+            <h3 class="project-row__title">${project.title}</h3>
+          </div>
+          <span class="project-row__index">${project.index}</span>
+        </div>
+        <p class="project-row__summary">${project.summary}</p>
+        <div class="chip-row chip-row--tight">
+          ${project.tags.map(createTag).join("")}
+        </div>
+        <div class="project-row__footer">
+          <span class="project-row__status">${project.footer}</span>
+          <div class="project-row__actions">
+            <button class="button button--primary button--compact" type="button" data-project-open="${index}">${copy.projects.detailCta}</button>
+            ${actionButtons.join("")}
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function createTechnologyCard(item, index = 0) {
+  return `
+    <article class="tech-card reveal reveal--up" style="--reveal-delay: ${12 + index * 10}ms">
+      <span class="tech-card__badge">${item.badge}</span>
+      <h3 class="tech-card__name">${item.name}</h3>
+      <p class="tech-card__group">${item.group}</p>
+    </article>
+  `;
+}
+
+function createCertificateState(copy) {
+  return `
+    <article class="empty-state reveal reveal--up" style="--reveal-delay: 16ms">
+      <p class="empty-state__title">${copy.showcase.tabs.certificates}</p>
+      <h3 class="empty-state__headline">${copy.showcase.emptyCertificates}</h3>
+      <p class="empty-state__copy">${currentLang === "es" ? "Cuando cargues certificados reales, esta vista mostrará sus imágenes y detalles." : "When you add real certificates, this view will show their images and details."}</p>
+    </article>
+  `;
+}
+
+function renderShowcaseContent(copy, tab = activeShowcaseTab) {
+  if (tab === "projects") {
+    return `
+      <div class="showcase-stack">
+        ${copy.projects.items.map((project, index) => createProjectShowcaseCard(project, copy, index)).join("")}
+      </div>
+    `;
+  }
+
+  if (tab === "certificates") {
+    return `
+      <div class="showcase-stack showcase-stack--single">
+        ${createCertificateState(copy)}
+      </div>
+    `;
+  }
+
+  const techItems = getTechnologyItems(copy);
+  return `
+    <div class="tech-grid">
+      ${techItems.map((item, index) => createTechnologyCard(item, index)).join("")}
+    </div>
+  `;
+}
+
+function createShowcaseSection(copy) {
+  const tabs = SHOWCASE_TABS.map((tab, index) => {
+    const isActive = tab === activeShowcaseTab;
+    return `
+      <button
+        class="showcase-tabs__button ${isActive ? "is-active" : ""}"
+        type="button"
+        role="tab"
+        aria-selected="${isActive ? "true" : "false"}"
+        data-showcase-tab="${tab}"
+        tabindex="${isActive ? "0" : "-1"}"
+        style="--showcase-index: ${index}"
+      >
+        ${getShowcaseLabel(copy, tab)}
+      </button>
+    `;
+  }).join("");
+
+  return `
+    <section class="section showcase" id="showcase">
+      <div class="shell showcase__shell">
+        <div class="section-head section-head--center">
+          <div class="section-head__copy">
+            <p class="section-kicker">${copy.showcase.kicker}</p>
+            <h2 class="section-title">${copy.showcase.title}</h2>
+          </div>
+          <p class="section-copy">${copy.showcase.copy}</p>
+        </div>
+
+        <div class="showcase-tabs" role="tablist" aria-label="${copy.showcase.title}">
+          <span class="showcase-tabs__indicator" data-showcase-indicator aria-hidden="true"></span>
+          ${tabs}
+        </div>
+
+        <div class="showcase-panel reveal reveal--up" data-showcase-panel style="--reveal-delay: 16ms">
+          ${renderShowcaseContent(copy, activeShowcaseTab)}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function createAboutSection(copy) {
+  return `
+    <section class="section about" id="about">
+      <div class="shell about__shell">
+        <div class="about__content">
+          <p class="section-kicker">${copy.about.kicker}</p>
+          <h2 class="about__name">${PROFILE.name}</h2>
+          <p class="about__lead">${copy.about.title}</p>
+          <p class="section-copy about__copy">${copy.about.copy}</p>
+
+          <div class="about__quote">
+            ${currentLang === "es" ? "Construyo interfaces claras y bases técnicas que conectan con necesidades reales." : "I build clear interfaces and technical foundations that connect with real needs."}
+          </div>
+
+          <div class="about__actions">
+            <a class="button button--primary" href="#showcase">${copy.hero.primaryCta}</a>
+            <a class="button button--secondary" href="./assets/cv-practicante.pdf" download>${currentLang === "es" ? "Descargar CV" : "Download CV"}</a>
+          </div>
+        </div>
+
+        <div class="about__portrait">
+          ${createPortraitCard("about")}
+        </div>
+      </div>
+
+      <div class="shell metrics-grid">
+        ${createMetricCard(currentLang === "es" ? "Proyectos" : "Projects", String(copy.projects.items.length), currentLang === "es" ? "Soluciones funcionales en uso y desarrollo" : "Functional solutions in use and development", 0)}
+        ${createMetricCard(currentLang === "es" ? "Certificados" : "Certificates", "0", currentLang === "es" ? "Aún no se han cargado certificados" : "No certificates have been uploaded yet", 1)}
+        ${createMetricCard(currentLang === "es" ? "Experiencia" : "Experience", String(copy.journey.items.length), currentLang === "es" ? "Formación y experiencia práctica" : "Training and practical experience", 2)}
+      </div>
+    </section>
+  `;
+}
+
+function createHeroSection(copy) {
+  const titleLines = getHeroHeadlineLines();
+  return `
+    <section class="hero" id="home">
+      <div class="shell hero__shell">
+        <div class="hero__content reveal reveal--left" style="--reveal-delay: 8ms">
+          <p class="hero__eyebrow">${PROFILE.role[currentLang]}</p>
+          <h1 class="hero__headline">
+            <span>${titleLines[0]}</span>
+            <span class="hero__headline-muted">${titleLines[1]}</span>
+          </h1>
+          <p class="hero__summary">${copy.hero.summary}</p>
+          <p class="hero__copy">${copy.hero.copy}</p>
+
+          <div class="hero__actions">
+            <a class="button button--primary" href="#showcase">${copy.hero.primaryCta}</a>
+            <a class="button button--secondary" href="#contact">${copy.hero.secondaryCta}</a>
+          </div>
+
+          <div class="hero__tags">
+            ${copy.hero.tags.map(createTag).join("")}
+          </div>
+
+          <div class="hero__socials">
+            <a class="hero__social" href="mailto:${PROFILE.email}">
+              <span>${currentLang === "es" ? "Correo" : "Email"}</span>
+              <small>${PROFILE.email}</small>
+            </a>
+            <a class="hero__social" href="${PROFILE.github}" target="_blank" rel="noreferrer">
+              <span>GitHub</span>
+              <small>${currentLang === "es" ? "Repositorio y código" : "Repository and code"}</small>
+            </a>
+            <a class="hero__social" href="tel:${PROFILE.phone.replace(/\s+/g, "")}">
+              <span>${currentLang === "es" ? "Teléfono" : "Phone"}</span>
+              <small>${PROFILE.phone}</small>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero__visual reveal reveal--right" style="--reveal-delay: 18ms">
+          ${createPortraitCard("hero")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function createExperienceSection(copy) {
+  return `
+    <section class="section experience" id="experience">
+      <div class="shell experience__shell">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">${copy.journey.kicker}</p>
+            <h2 class="section-title">${copy.journey.title}</h2>
+          </div>
+          <p class="section-copy">${copy.journey.copy}</p>
+        </div>
+        <div class="experience__list">
+          ${copy.journey.items
+            .map(
+              (item, index) => `
+                <article class="timeline-row reveal ${index % 2 === 0 ? "reveal--left" : "reveal--right"}" style="--reveal-delay: ${18 + index * 20}ms">
+                  <span class="timeline-row__year">${item.year}</span>
+                  <div>
+                    <h3 class="timeline-row__title">${item.title}</h3>
+                    <p class="timeline-row__text">${item.text}</p>
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function createContactSection(copy) {
+  return `
+    <section class="section contact" id="contact">
+      <div class="shell contact__shell">
+        <div class="contact__intro reveal reveal--left" style="--reveal-delay: 12ms">
+          <p class="section-kicker">${copy.contact.kicker}</p>
+          <h2 class="section-title">${copy.contact.title}</h2>
+          <p class="section-copy">${copy.contact.copy}</p>
+
+          <div class="contact__cards">
+            <a class="contact-card-mini" href="mailto:${PROFILE.email}">
+              <span class="contact-card-mini__label">${copy.contact.emailLabel}</span>
+              <strong class="contact-card-mini__value">${PROFILE.email}</strong>
+            </a>
+            <a class="contact-card-mini" href="tel:${PROFILE.phone.replace(/\s+/g, "")}">
+              <span class="contact-card-mini__label">${copy.contact.phoneLabel}</span>
+              <strong class="contact-card-mini__value">${PROFILE.phone}</strong>
+            </a>
+            <a class="contact-card-mini" href="${PROFILE.github}" target="_blank" rel="noreferrer">
+              <span class="contact-card-mini__label">GitHub</span>
+              <strong class="contact-card-mini__value">${PROFILE.github.replace("https://", "")}</strong>
+            </a>
+          </div>
+        </div>
+
+        <div class="contact__form reveal reveal--right" style="--reveal-delay: 18ms">
+          <p class="section-kicker">${copy.contact.formTitle}</p>
+          <form class="contact-form" id="contact-form">
+            <div class="field">
+              <label for="name">${copy.contact.formName}</label>
+              <input class="input" id="name" name="name" type="text" placeholder="${copy.contact.formName}" />
+            </div>
+
+            <div class="field">
+              <label for="email">${copy.contact.formEmail}</label>
+              <input class="input" id="email" name="email" type="email" placeholder="${copy.contact.formEmail}" />
+            </div>
+
+            <div class="field">
+              <label for="message">${copy.contact.formMessage}</label>
+              <textarea class="textarea" id="message" name="message" placeholder="${copy.contact.formMessage}"></textarea>
+            </div>
+
+            <div class="contact-form__actions">
+              <button class="button button--primary" type="submit">${copy.contact.submit}</button>
+              <button class="button button--secondary" type="reset">${copy.contact.clear}</button>
+            </div>
+
+            <p class="status">${copy.contact.status}</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function createFooter(copy) {
+  return `
+    <footer class="footer">
+      <div class="shell footer__inner">
+        <p>${copy.footer}</p>
+        <div class="footer__links">
+          <a href="${PROFILE.github}" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="mailto:${PROFILE.email}">${PROFILE.email}</a>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+function buildPageMarkup(copy, shouldShowIntro) {
+  return `
+    ${shouldShowIntro ? createIntroOverlay() : ""}
+    <div class="page">
+      <header class="topbar">
+        <div class="shell topbar__inner">
+          <a class="brand" href="#home" aria-label="Home">
+            <span class="brand__mark">DH</span>
+            <span class="brand__text">danilitohh.dev</span>
+          </a>
+          <nav class="nav" aria-label="Primary">
+            ${copy.nav.map(createNavItem).join("")}
+          </nav>
+          <div class="lang-switch" role="group" aria-label="Language switcher">
+            <button type="button" class="${currentLang === "es" ? "is-active" : ""}" data-lang="es">ES</button>
+            <button type="button" class="${currentLang === "en" ? "is-active" : ""}" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="page__main">
+        ${createHeroSection(copy)}
+        ${createAboutSection(copy)}
+        ${createShowcaseSection(copy)}
+        ${createExperienceSection(copy)}
+        ${createContactSection(copy)}
+      </main>
+
+      ${createFooter(copy)}
+    </div>
+  `;
+}
+
+function syncShowcaseTabs() {
+  const buttons = document.querySelectorAll("[data-showcase-tab]");
+  buttons.forEach((button) => {
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+
+    const isActive = button.dataset.showcaseTab === activeShowcaseTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  syncShowcaseIndicator();
+}
+
+function syncShowcaseIndicator() {
+  const tabs = document.querySelector(".showcase-tabs");
+  const indicator = document.querySelector("[data-showcase-indicator]");
+  const activeButton = document.querySelector(`[data-showcase-tab="${activeShowcaseTab}"]`);
+
+  if (!(tabs instanceof HTMLElement) || !(indicator instanceof HTMLElement) || !(activeButton instanceof HTMLElement)) {
+    return;
+  }
+
+  const tabsRect = tabs.getBoundingClientRect();
+  const buttonRect = activeButton.getBoundingClientRect();
+  indicator.style.setProperty("--indicator-x", `${buttonRect.left - tabsRect.left}px`);
+  indicator.style.setProperty("--indicator-width", `${buttonRect.width}px`);
+}
+
+function updateShowcasePanel() {
+  const panel = document.querySelector("[data-showcase-panel]");
+  if (!(panel instanceof HTMLElement)) {
+    return;
+  }
+
+  if (showcaseTransitionTimerId) {
+    window.clearTimeout(showcaseTransitionTimerId);
+  }
+
+  panel.classList.add("is-transitioning");
+  showcaseTransitionTimerId = window.setTimeout(() => {
+    panel.innerHTML = renderShowcaseContent(getCopy(), activeShowcaseTab);
+    panel.classList.remove("is-transitioning");
+    panel.classList.add("is-visible");
+    observeReveal();
+    revealAboveFold();
+    showcaseTransitionTimerId = 0;
+  }, 180);
+}
+
+function setShowcaseTab(tab) {
+  if (!SHOWCASE_TABS.includes(tab) || tab === activeShowcaseTab) {
+    return;
+  }
+
+  activeShowcaseTab = tab;
+  syncShowcaseTabs();
+  updateShowcasePanel();
 }
 
 function getObservedSections() {
@@ -1168,6 +1629,8 @@ function bindScrollChrome() {
   window.addEventListener("scroll", scheduleScrollChrome, { passive: true });
   window.addEventListener("resize", scheduleScrollChrome, { passive: true });
   window.addEventListener("orientationchange", scheduleScrollChrome, { passive: true });
+  window.addEventListener("resize", syncShowcaseTabs, { passive: true });
+  window.addEventListener("orientationchange", syncShowcaseTabs, { passive: true });
 }
 
 function setupActiveSectionObserver() {
@@ -1290,7 +1753,34 @@ function setupIntroOverlay() {
 
   introTimerId = window.setTimeout(() => {
     dismissIntroOverlay();
-  }, 1450);
+  }, 2250);
+}
+
+function schedulePreviewScroll() {
+  if (!PREVIEW_SECTION || !ACTIVE_SECTION_IDS.includes(PREVIEW_SECTION) || previewScrollTimerId) {
+    return;
+  }
+
+  return;
+
+  const delay = introState.pending && !prefersReducedMotion() ? 2500 : 120;
+  previewScrollTimerId = window.setTimeout(() => {
+    previewScrollTimerId = 0;
+
+    const target = document.getElementById(PREVIEW_SECTION);
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const scrollTarget = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 92);
+    const previousBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo({ top: scrollTarget, behavior: "auto" });
+
+    window.requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = previousBehavior;
+    });
+  }, delay);
 }
 
 function revealAboveFold() {
@@ -1546,7 +2036,7 @@ function createProjectModal(copy) {
     <div class="project-modal" role="presentation" aria-hidden="false">
       <div class="project-modal__backdrop" data-project-close></div>
       <div class="shell project-modal__panel" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
-        <button class="project-modal__close" type="button" data-project-close-primary data-project-close aria-label="${copy.projects.modalClose}">×</button>
+        <button class="project-modal__close" type="button" data-project-close-primary data-project-close aria-label="${copy.projects.modalClose}">${currentLang === "es" ? "← Volver" : "← Back"}</button>
 
         <div class="project-modal__header">
           <div>
@@ -1558,6 +2048,11 @@ function createProjectModal(copy) {
 
         <p class="project-modal__summary">${project.summary}</p>
         <p class="project-modal__copy">${detail.overview}</p>
+
+        <div class="project-modal__stats">
+          <span>${currentLang === "es" ? `${detail.stack.length} tecnologías` : `${detail.stack.length} technologies`}</span>
+          <span>${currentLang === "es" ? `${detail.capabilities.length} características` : `${detail.capabilities.length} features`}</span>
+        </div>
 
         <div class="project-modal__layout">
           <div class="project-modal__gallery">
@@ -1743,6 +2238,7 @@ function render() {
   }
 
   document.body.classList.toggle("intro-active", shouldShowIntro || introState.active);
+  document.body.dataset.previewSection = PREVIEW_SECTION || "";
 
   document.documentElement.lang = currentLang;
   document.title = copy.pageTitle;
@@ -1751,6 +2247,16 @@ function render() {
   if (metaDescription) {
     metaDescription.setAttribute("content", copy.pageDescription);
   }
+
+  app.innerHTML = buildPageMarkup(copy, shouldShowIntro);
+  syncModalRoot();
+  bindEvents();
+  setupPageAnimations();
+  syncWaterCursor();
+  syncProjectFocus();
+  syncShowcaseTabs();
+  schedulePreviewScroll();
+  return;
 
   app.innerHTML = `
     ${shouldShowIntro ? createIntroOverlay() : ""}
@@ -2066,6 +2572,16 @@ function handleProjectInteractions(event) {
     const index = Number(thumbTrigger.dataset.projectThumb);
     if (Number.isInteger(index)) {
       setActiveProjectImage(index);
+    }
+    return;
+  }
+
+  const tabTrigger = target.closest("[data-showcase-tab]");
+  if (tabTrigger) {
+    event.preventDefault();
+    const tab = tabTrigger.dataset.showcaseTab;
+    if (tab) {
+      setShowcaseTab(tab);
     }
     return;
   }
