@@ -5,8 +5,8 @@ const SUPPORTED_LANGS = new Set(["es", "en"]);
 const PROFILE = {
   name: "Tu Nombre",
   role: {
-    es: "Desarrollador/a Front-end bilingüe",
-    en: "Bilingual Front-end Developer",
+    es: "Desarrollador/a de software bilingüe",
+    en: "Bilingual Software Developer",
   },
   email: "tu-correo@ejemplo.com",
   github: "https://github.com/tu-usuario",
@@ -20,8 +20,8 @@ const PROFILE = {
     en: "Available for freelance work, remote roles, and creative collaborations.",
   },
   focus: {
-    es: "Interfaz, animación y experiencias web flexibles.",
-    en: "Interface, motion, and flexible web experiences.",
+    es: "Interfaces, productos digitales y experiencias web flexibles.",
+    en: "Interfaces, digital products, and flexible web experiences.",
   },
   languages: {
     es: "Español e inglés",
@@ -33,30 +33,31 @@ const CONTENT = {
   es: {
     pageTitle: "Portafolio | Tu Nombre",
     pageDescription:
-      "Portafolio bilingüe en JavaScript para mostrar proyectos, habilidades, experiencia y contacto.",
+      "Portafolio bilingüe de desarrollador de software con estética tecnológica, profesional y humana.",
     nav: [
       { label: "Inicio", href: "#home" },
       { label: "Sobre mí", href: "#about" },
+      { label: "Tecnologías", href: "#technologies" },
       { label: "Proyectos", href: "#projects" },
-      { label: "Habilidades", href: "#skills" },
+      { label: "Experiencia", href: "#experience" },
       { label: "Contacto", href: "#contact" },
     ],
     hero: {
       eyebrow: "Portafolio bilingüe",
-      title: "Diseño páginas con identidad fuerte y una estructura fácil de adaptar.",
+      title: "Construyo soluciones digitales claras, útiles y cercanas.",
       copy:
-        "Este es un punto de partida para mostrar quién eres, qué haces y cómo trabajas. Toda la información vive en un solo lugar para que editar contenido, cambiar secciones o ajustar el estilo sea rápido.",
+        "Combino diseño de interfaces, criterio técnico y comunicación cercana para convertir ideas complejas en productos web confiables y fáciles de usar.",
       primaryCta: "Ver proyectos",
       secondaryCta: "Escribirme",
       stats: [
         { value: "ES / EN", label: "Navegación bilingüe" },
+        { value: "UI + CODE", label: "Diseño y desarrollo" },
         { value: "100%", label: "Contenido editable" },
-        { value: "JS", label: "Lógica y renderizado" },
       ],
       profileTitle: "Perfil editable",
       profileCaption:
         "Reemplaza este bloque con tu nombre, una foto si quieres, y una descripción breve que resuma tu propuesta de valor.",
-      tags: ["Responsive", "Accesible", "Modular"],
+      tags: ["Responsivo", "Accesible", "Colaborativo"],
     },
     snapshot: [
       { label: "Rol", value: PROFILE.role.es },
@@ -67,32 +68,33 @@ const CONTENT = {
     ],
     about: {
       kicker: "Sobre mí",
-      title: "Cuenta tu historia sin pelearte con el diseño.",
+      title: "Tecnología con criterio humano.",
       copy:
-        "Aquí puedes poner una bio corta, explicar tu enfoque y describir el tipo de problemas que te gusta resolver. La estructura está pensada para que puedas mover o ampliar secciones sin romper la composición.",
+        "Aquí puedes contar cómo conectas la parte técnica con la comprensión real de una necesidad. Es el lugar para explicar cómo piensas, cómo priorizas y cómo trabajas con otras personas.",
       pillars: [
         {
-          title: "Presentación personal",
-          text: "Una descripción clara de tu perfil, tu enfoque y tu estilo de trabajo.",
+          title: "Solidez técnica",
+          text: "Construyo interfaces y soluciones mantenibles, con atención al detalle y estructura clara.",
         },
         {
-          title: "Qué aportas",
-          text: "Resume resultados, procesos o el tipo de valor que entregas en cada proyecto.",
+          title: "Comprensión de necesidades",
+          text: "Escucho, traduzco objetivos y convierto ideas abiertas en decisiones concretas.",
         },
         {
-          title: "Qué buscas",
-          text: "Aclara si quieres empleo, freelancing, colaboraciones o proyectos personales.",
+          title: "Trabajo con personas",
+          text: "Comunico avances con claridad, colaboro bien y cuido la experiencia de quien usará el producto.",
         },
       ],
     },
     projects: {
       kicker: "Proyectos",
-      title: "Muestra tu trabajo con tarjetas listas para crecer.",
+      title: "Proyectos que muestran proceso, criterio y resultado.",
       copy:
-        "Cada tarjeta está pensada para que cambies imagen, nombre, descripción, tecnologías y enlace de GitHub sin tocar la estructura general. Puedes duplicarlas o reducirlas según tu experiencia.",
+        "Cada tarjeta admite imagen, tecnologías, enlace al proyecto y repositorio para que presentes tu trabajo con claridad visual y técnica.",
+      liveCta: "Ver proyecto",
       repoCta: "Ver repositorio",
       imageFallbackTitle: "Agrega una imagen",
-      imageFallbackText: "Usa una ruta como assets/projects/proyecto-01.jpg o un PNG/SVG local.",
+      imageFallbackText: "Usa una ruta local como assets/projects/proyecto-01.jpg o un SVG/PNG.",
       items: [
         {
           index: "01",
@@ -100,11 +102,12 @@ const CONTENT = {
           title: "Nombre del proyecto",
           image: "",
           imageAlt: "Vista previa del proyecto destacado",
+          liveUrl: "https://tu-proyecto-01.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-01",
           summary:
-            "Describe el problema, tu rol, el proceso y el resultado. Puedes añadir aquí una frase corta con el impacto o el objetivo principal.",
+            "Describe el problema, tu rol, el proceso y el resultado. Puedes añadir una frase sobre el impacto o el objetivo principal.",
           tags: ["JavaScript", "UI", "Responsive"],
-          footer: "Añade enlace a demo o repositorio",
+          footer: "Añade enlaces a demo y repositorio",
         },
         {
           index: "02",
@@ -112,11 +115,12 @@ const CONTENT = {
           title: "Nombre del producto",
           image: "",
           imageAlt: "Vista previa del producto",
+          liveUrl: "https://tu-proyecto-02.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-02",
           summary:
             "Usa esta tarjeta para proyectos de marketing, dashboards, apps internas, sitios corporativos o cualquier idea visual que quieras destacar.",
-          tags: ["Motion", "Design system", "Accessibility"],
-          footer: "Añade enlace a caso de estudio",
+          tags: ["Motion", "Sistema visual", "Accesibilidad"],
+          footer: "Añade enlace al caso o demo",
         },
         {
           index: "03",
@@ -124,39 +128,46 @@ const CONTENT = {
           title: "Nombre del experimento",
           image: "",
           imageAlt: "Vista previa del experimento",
+          liveUrl: "https://tu-proyecto-03.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-03",
           summary:
             "Perfecta para demostrar iteración, pruebas visuales o proyectos personales que muestran tu forma de explorar y aprender.",
-          tags: ["Animation", "API", "Creative coding"],
+          tags: ["Animación", "API", "Creative coding"],
           footer: "Añade enlace a código o demo",
         },
       ],
     },
     skills: {
-      kicker: "Habilidades",
-      title: "Organiza tus conocimientos por bloques, no por caos.",
+      kicker: "Tecnologías",
+      title: "Organiza tu stack para que se entienda rápido.",
       copy:
-        "Separar tus habilidades en categorías facilita que la página crezca con el tiempo. También ayuda a que quien visita tu portafolio entienda rápido dónde eres más fuerte.",
+        "Agrupar tecnologías por contexto ayuda a leer tu nivel técnico sin perderse. Reemplaza estas categorías por tu stack real y mantén la estructura limpia.",
       groups: [
         {
-          title: "Interfaz",
-          items: ["HTML semántico", "CSS avanzado", "JavaScript", "Accesibilidad"],
+          icon: "FE",
+          title: "Front-end",
+          summary: "Construcción visual y arquitectura de interfaz.",
+          items: ["HTML semántico", "CSS moderno", "JavaScript", "React", "Responsive design"],
         },
         {
-          title: "Diseño",
-          items: ["Sistemas visuales", "Tipografía", "Layout responsive", "Microinteracciones"],
+          icon: "API",
+          title: "Backend & APIs",
+          summary: "Lógica, integración y comunicación entre servicios.",
+          items: ["Node.js", "REST APIs", "Autenticación", "Integraciones", "Bases de datos"],
         },
         {
-          title: "Herramientas",
-          items: ["Git y GitHub", "Figma", "APIs", "Flujo de trabajo flexible"],
+          icon: "DX",
+          title: "Workflow",
+          summary: "Herramientas que mantienen el trabajo ordenado y colaborativo.",
+          items: ["Git y GitHub", "Figma", "Testing", "Deploy", "Documentación"],
         },
       ],
     },
     journey: {
       kicker: "Experiencia",
-      title: "Usa esta línea de tiempo para presentar tu recorrido.",
+      title: "Experiencia y formación que respaldan mi forma de trabajar.",
       copy:
-        "Puede ser tu experiencia laboral, estudios, certificaciones o hitos personales. Si prefieres, esta sección también puede convertirse en educación o logros.",
+        "Puedes usar esta línea de tiempo para mostrar empleo, estudios, certificaciones o hitos personales. También sirve para contar cómo has crecido como profesional.",
       items: [
         {
           year: "2026",
@@ -177,9 +188,9 @@ const CONTENT = {
     },
     contact: {
       kicker: "Contacto",
-      title: "Haz que hablar contigo sea lo más simple posible.",
+      title: "Hablemos de tu siguiente idea.",
       copy:
-        "Puedes enlazar correo, GitHub, LinkedIn o cualquier canal que uses. El formulario genera un correo listo para enviar, así no necesitas backend para empezar.",
+        "Aquí puedes dejar tu correo, GitHub, LinkedIn o cualquier canal que uses. El formulario abre tu cliente de correo sin necesidad de backend.",
       emailLabel: "Correo",
       actionLabel: "Abrir",
       locationLabel: "Ubicación",
@@ -191,35 +202,36 @@ const CONTENT = {
       clear: "Limpiar",
       status: "El formulario abrirá tu cliente de correo con el mensaje preparado.",
     },
-    footer: "Base de portafolio en JavaScript puro. Edita el contenido y adapta el diseño a tu estilo.",
+    footer: "Diseñado para mostrar trabajo real con una identidad cercana y sólida.",
   },
   en: {
     pageTitle: "Portfolio | Your Name",
     pageDescription:
-      "Bilingual JavaScript portfolio base to showcase projects, skills, experience, and contact.",
+      "Bilingual software developer portfolio with a technological, professional, modern, and human feel.",
     nav: [
       { label: "Home", href: "#home" },
       { label: "About", href: "#about" },
+      { label: "Technologies", href: "#technologies" },
       { label: "Projects", href: "#projects" },
-      { label: "Skills", href: "#skills" },
+      { label: "Experience", href: "#experience" },
       { label: "Contact", href: "#contact" },
     ],
     hero: {
       eyebrow: "Bilingual portfolio",
-      title: "I design pages with a strong identity and a structure that is easy to adapt.",
+      title: "I build digital solutions that are clear, useful, and human.",
       copy:
-        "This is a starting point to show who you are, what you do, and how you work. All content lives in one place so editing, restructuring, or restyling stays fast.",
+        "I combine interface design, technical judgment, and close communication to turn complex ideas into reliable web products that are easy to use.",
       primaryCta: "View projects",
       secondaryCta: "Email me",
       stats: [
         { value: "ES / EN", label: "Bilingual navigation" },
+        { value: "UI + CODE", label: "Design and development" },
         { value: "100%", label: "Editable content" },
-        { value: "JS", label: "Logic and rendering" },
       ],
       profileTitle: "Editable profile",
       profileCaption:
         "Replace this block with your name, a photo if you want one, and a short description that sums up your value.",
-      tags: ["Responsive", "Accessible", "Modular"],
+      tags: ["Responsive", "Accessible", "Collaborative"],
     },
     snapshot: [
       { label: "Role", value: PROFILE.role.en },
@@ -230,32 +242,33 @@ const CONTENT = {
     ],
     about: {
       kicker: "About",
-      title: "Tell your story without fighting the layout.",
+      title: "Technology with human judgment.",
       copy:
-        "Use this section to add a short bio, explain your approach, and describe the kinds of problems you enjoy solving. The structure is designed so you can move or expand sections without breaking the composition.",
+        "Use this section to explain how you connect the technical side with the real needs behind a project. It is the place to show how you think, prioritize, and work with others.",
       pillars: [
         {
-          title: "Personal intro",
-          text: "A clear description of your profile, your focus, and how you like to work.",
+          title: "Technical depth",
+          text: "I build maintainable interfaces and solutions with structure, clarity, and attention to detail.",
         },
         {
-          title: "What you bring",
-          text: "Summarize outcomes, process, or the type of value you create in each project.",
+          title: "Understanding needs",
+          text: "I listen, translate goals, and turn open-ended ideas into concrete decisions.",
         },
         {
-          title: "What you want",
-          text: "Clarify whether you're open to employment, freelancing, collaborations, or side projects.",
+          title: "Working with people",
+          text: "I communicate progress clearly, collaborate well, and care about the experience of the person using the product.",
         },
       ],
     },
     projects: {
       kicker: "Projects",
-      title: "Show your work with cards ready to grow.",
+      title: "Projects that show process, judgment, and outcome.",
       copy:
-        "Each card is built so you can change the image, name, description, technologies, and GitHub link without touching the overall structure. Duplicate or trim them based on your experience.",
+        "Each card supports an image, technologies, a live project link, and a repository link so you can present your work clearly and visually.",
+      liveCta: "View project",
       repoCta: "View repository",
       imageFallbackTitle: "Add an image",
-      imageFallbackText: "Use a path like assets/projects/project-01.jpg or a local PNG/SVG.",
+      imageFallbackText: "Use a local path like assets/projects/project-01.jpg or an SVG/PNG.",
       items: [
         {
           index: "01",
@@ -263,11 +276,12 @@ const CONTENT = {
           title: "Project name",
           image: "",
           imageAlt: "Featured project preview",
+          liveUrl: "https://tu-proyecto-01.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-01",
           summary:
-            "Describe the problem, your role, the process, and the result. You can add one short sentence about impact or the main goal.",
+            "Describe the problem, your role, the process, and the result. Add a short sentence about impact or the main goal.",
           tags: ["JavaScript", "UI", "Responsive"],
-          footer: "Add a live demo or repository link",
+          footer: "Add a live demo and repository link",
         },
         {
           index: "02",
@@ -275,11 +289,12 @@ const CONTENT = {
           title: "Product name",
           image: "",
           imageAlt: "Product preview",
+          liveUrl: "https://tu-proyecto-02.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-02",
           summary:
             "Use this card for marketing sites, dashboards, internal tools, corporate pages, or any visual idea you want to highlight.",
-          tags: ["Motion", "Design system", "Accessibility"],
-          footer: "Add a case-study link",
+          tags: ["Motion", "Visual system", "Accessibility"],
+          footer: "Add a case-study or demo link",
         },
         {
           index: "03",
@@ -287,6 +302,7 @@ const CONTENT = {
           title: "Experiment name",
           image: "",
           imageAlt: "Experiment preview",
+          liveUrl: "https://tu-proyecto-03.com",
           repoUrl: "https://github.com/tu-usuario/proyecto-03",
           summary:
             "Perfect for showing iteration, visual tests, or personal projects that reveal how you explore and learn.",
@@ -296,30 +312,36 @@ const CONTENT = {
       ],
     },
     skills: {
-      kicker: "Skills",
-      title: "Group your knowledge into clear blocks, not chaos.",
+      kicker: "Technologies",
+      title: "Organize your stack so it is readable at a glance.",
       copy:
-        "Separating your skills into categories makes the page easier to grow over time. It also helps visitors quickly understand where you're strongest.",
+        "Grouping technologies by context helps people understand your technical level without getting lost. Replace these categories with your real stack and keep the structure tidy.",
       groups: [
         {
-          title: "Interface",
-          items: ["Semantic HTML", "Advanced CSS", "JavaScript", "Accessibility"],
+          icon: "FE",
+          title: "Front-end",
+          summary: "Visual construction and interface architecture.",
+          items: ["Semantic HTML", "Modern CSS", "JavaScript", "React", "Responsive design"],
         },
         {
-          title: "Design",
-          items: ["Visual systems", "Typography", "Responsive layouts", "Micro-interactions"],
+          icon: "API",
+          title: "Backend & APIs",
+          summary: "Logic, integration, and service communication.",
+          items: ["Node.js", "REST APIs", "Authentication", "Integrations", "Databases"],
         },
         {
-          title: "Tools",
-          items: ["Git and GitHub", "Figma", "APIs", "Flexible workflow"],
+          icon: "DX",
+          title: "Workflow",
+          summary: "Tools that keep the work tidy and collaborative.",
+          items: ["Git and GitHub", "Figma", "Testing", "Deploy", "Documentation"],
         },
       ],
     },
     journey: {
       kicker: "Experience",
-      title: "Use the timeline to present your path.",
+      title: "Experience and education that back up how I work.",
       copy:
-        "This can be work experience, studies, certifications, or personal milestones. If you want, this section can also become education or achievements.",
+        "You can use this timeline to show employment, studies, certifications, or personal milestones. It also works well to explain how you have grown as a professional.",
       items: [
         {
           year: "2026",
@@ -340,9 +362,9 @@ const CONTENT = {
     },
     contact: {
       kicker: "Contact",
-      title: "Make getting in touch as simple as possible.",
+      title: "Let's talk about your next idea.",
       copy:
-        "You can link email, GitHub, LinkedIn, or any channel you use. The form generates a ready-to-send email so you do not need a backend to start.",
+        "Leave your email, GitHub, LinkedIn, or any channel you use. The form opens your mail client without needing a backend.",
       emailLabel: "Email",
       actionLabel: "Open",
       locationLabel: "Location",
@@ -354,7 +376,7 @@ const CONTENT = {
       clear: "Clear",
       status: "The form will open your mail client with the message prefilled.",
     },
-    footer: "Plain JavaScript portfolio base. Edit the content and adapt the design to your style.",
+    footer: "Built to show real work with a solid, approachable identity.",
   },
 };
 
@@ -411,11 +433,25 @@ function createProjectMedia(project, copy) {
   `;
 }
 
-function createProjectCard(project, copy) {
-  const repoLink = project.repoUrl
-    ? `<a class="project-link" href="${project.repoUrl}" target="_blank" rel="noreferrer">${copy.projects.repoCta}</a>`
-    : "";
+function createProjectActions(project, copy) {
+  const buttons = [];
 
+  if (project.liveUrl) {
+    buttons.push(
+      `<a class="project-link project-link--primary" href="${project.liveUrl}" target="_blank" rel="noreferrer">${copy.projects.liveCta}</a>`,
+    );
+  }
+
+  if (project.repoUrl) {
+    buttons.push(
+      `<a class="project-link" href="${project.repoUrl}" target="_blank" rel="noreferrer">${copy.projects.repoCta}</a>`,
+    );
+  }
+
+  return buttons.length ? `<div class="project-card__links">${buttons.join("")}</div>` : "";
+}
+
+function createProjectCard(project, copy) {
   return `
     <article class="project-card reveal">
       ${createProjectMedia(project, copy)}
@@ -433,8 +469,8 @@ function createProjectCard(project, copy) {
         </div>
         <div class="project-card__footer">
           <small>${project.footer}</small>
-          ${repoLink}
         </div>
+        ${createProjectActions(project, copy)}
       </div>
     </article>
   `;
@@ -443,10 +479,17 @@ function createProjectCard(project, copy) {
 function createSkillCard(group) {
   return `
     <article class="skill-card reveal">
-      <h3 class="skill-card__title">${group.title}</h3>
-      <ul class="skill-list">
-        ${group.items.map((item) => `<li>${item}</li>`).join("")}
-      </ul>
+      <div class="skill-card__head">
+        <span class="skill-card__icon">${group.icon}</span>
+        <div>
+          <p class="skill-card__kicker">Stack</p>
+          <h3 class="skill-card__title">${group.title}</h3>
+        </div>
+      </div>
+      <p class="skill-card__summary">${group.summary}</p>
+      <div class="chip-row chip-row--tight">
+        ${group.items.map(createTag).join("")}
+      </div>
     </article>
   `;
 }
@@ -528,8 +571,10 @@ function render() {
           <div class="shell hero__grid">
             <article class="hero__copy reveal">
               <div class="eyebrow">${copy.hero.eyebrow}</div>
-              <h1>${copy.hero.title}</h1>
-              <p class="hero__lede">${copy.hero.copy}</p>
+              <h1 class="hero__name">${PROFILE.name}</h1>
+              <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
+              <p class="hero__lede">${copy.hero.title}</p>
+              <p class="hero__copy-text">${copy.hero.copy}</p>
 
               <div class="hero__actions">
                 <a class="button button--primary" href="#projects">${copy.hero.primaryCta}</a>
@@ -618,7 +663,7 @@ function render() {
           </div>
         </section>
 
-        <section class="section" id="skills">
+        <section class="section" id="technologies">
           <div class="shell section-card reveal">
             <div class="section-head">
               <div>
@@ -633,7 +678,7 @@ function render() {
           </div>
         </section>
 
-        <section class="section">
+        <section class="section" id="experience">
           <div class="shell section-card reveal">
             <div class="section-head">
               <div>
