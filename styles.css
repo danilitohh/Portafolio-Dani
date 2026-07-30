@@ -786,7 +786,7 @@ button {
   display: grid;
   grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
   gap: 0;
-  align-items: stretch;
+  align-items: start;
   overflow: hidden;
   cursor: pointer;
   transition:
@@ -808,21 +808,23 @@ button {
 
 .project-card__media {
   position: relative;
-  min-height: 100%;
-  height: 100%;
+  align-self: start;
+  min-height: 0;
+  height: 240px;
   overflow: hidden;
-  padding: 0.7rem;
+  padding: 0.8rem;
   background:
     radial-gradient(circle at 20% 20%, rgba(25, 195, 177, 0.2), transparent 28%),
     radial-gradient(circle at 82% 16%, rgba(124, 92, 252, 0.22), transparent 26%),
     linear-gradient(145deg, rgba(18, 27, 44, 0.98), rgba(13, 19, 32, 0.98));
+  border-right: 1px solid rgba(39, 53, 77, 0.55);
 }
 
 .project-card__media::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(11, 18, 32, 0.14) 54%, rgba(11, 18, 32, 0.82) 100%);
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0.03) 0%, rgba(11, 18, 32, 0.1) 70%, rgba(11, 18, 32, 0.34) 100%);
   pointer-events: none;
 }
 
@@ -830,7 +832,7 @@ button {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center top;
 }
 
@@ -1698,6 +1700,7 @@ button {
 .project-card {
   border-radius: 28px;
   grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  align-items: start;
 }
 
 .project-card__media {
@@ -2033,7 +2036,7 @@ body::after {
 }
 
 .project-card:hover .project-card__image {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .timeline-year {
@@ -2229,6 +2232,8 @@ body::after {
     min-height: 220px;
     height: auto;
     aspect-ratio: 16 / 10;
+    border-right: 0;
+    border-bottom: 1px solid rgba(39, 53, 77, 0.55);
   }
 
   .project-card .card-title,
