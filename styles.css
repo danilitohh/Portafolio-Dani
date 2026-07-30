@@ -3261,12 +3261,12 @@ body[data-preview-section="contact"] .footer {
 }
 
 .portrait--hero {
-  margin-top: clamp(-2rem, -2vw, -0.9rem);
+  margin-top: clamp(-2.75rem, -2.5vw, -1.25rem);
 }
 
 .portrait {
   position: relative;
-  width: min(100%, 16.5rem);
+  width: min(100%, 20.5rem);
   margin: 0;
   padding-top: 4.25rem;
   transform: translate3d(0, var(--portrait-lift, 0px), 0) rotate(var(--portrait-tilt, -1.35deg));
@@ -4213,7 +4213,7 @@ body[data-preview-section="contact"] .footer {
   }
 
   .portrait {
-    width: min(100%, 15.5rem);
+    width: min(100%, 18.5rem);
     cursor: default;
   }
 
