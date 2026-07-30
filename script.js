@@ -471,10 +471,7 @@ let activeProjectIndex = null;
 let activeProjectImageIndex = 0;
 let pendingProjectFocusIndex = null;
 let appInteractionsBound = false;
-let pageAnimationContext = null;
 let pageRevealObserver = null;
-let lenisInstance = null;
-let lenisTickerAdded = false;
 let waterCursorState = {
   initialized: false,
   root: null,
@@ -511,12 +508,17 @@ function isCompactViewport() {
   return window.matchMedia?.("(max-width: 980px)")?.matches ?? false;
 }
 
+function hasConstrainedConnection() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  return Boolean(connection?.saveData) || ["slow-2g", "2g"].includes(connection?.effectiveType);
+}
+
 function shouldUseEnhancedMotion() {
-  return !prefersReducedMotion() && hasFinePointer() && !isCompactViewport();
+  return !prefersReducedMotion() && hasFinePointer() && !isCompactViewport() && !hasConstrainedConnection();
 }
 
 function supportsWaterCursor() {
-  return !prefersReducedMotion() && hasFinePointer();
+  return !prefersReducedMotion() && hasFinePointer() && !hasConstrainedConnection();
 }
 
 function createWaterCursor() {
@@ -1150,7 +1152,7 @@ function createProjectActions(project, copy) {
 
 function createProjectCard(project, copy, index = 0) {
   return `
-    <article class="project-card reveal reveal--up" style="--reveal-delay: ${120 + index * 90}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
+    <article class="project-card reveal reveal--up" style="--reveal-delay: ${24 + index * 24}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
       ${createProjectMedia(project, copy)}
       <div class="project-card__body">
         <div class="project-card__head">
@@ -1280,7 +1282,7 @@ function createProjectModal(copy) {
 
 function createSkillCard(group, index = 0) {
   return `
-    <article class="skill-card reveal reveal--up" style="--reveal-delay: ${110 + index * 90}ms">
+    <article class="skill-card reveal reveal--up" style="--reveal-delay: ${20 + index * 22}ms">
       <div class="skill-card__head">
         <span class="skill-card__icon">${group.icon}</span>
         <div>
@@ -1299,7 +1301,7 @@ function createSkillCard(group, index = 0) {
 function createTimelineCard(item, index = 0) {
   const directionClass = index % 2 === 0 ? "reveal--left" : "reveal--right";
   return `
-    <article class="timeline-card reveal ${directionClass}" style="--reveal-delay: ${100 + index * 85}ms">
+    <article class="timeline-card reveal ${directionClass}" style="--reveal-delay: ${18 + index * 22}ms">
       <div class="timeline-year">${item.year}</div>
       <div>
         <h3 class="timeline-title">${item.title}</h3>
@@ -1311,7 +1313,7 @@ function createTimelineCard(item, index = 0) {
 
 function createSnapshotItem(item, index = 0) {
   return `
-    <div class="panel-item reveal reveal--zoom" style="--reveal-delay: ${140 + index * 85}ms">
+    <div class="panel-item reveal reveal--zoom" style="--reveal-delay: ${28 + index * 18}ms">
       <span class="panel-item__dot" aria-hidden="true"></span>
       <div class="panel-item__content">
         <h3 class="panel-item__title">${item.label}</h3>
@@ -1324,7 +1326,7 @@ function createSnapshotItem(item, index = 0) {
 function createSocialItem(link, copy, index = 0) {
   const external = link.href.startsWith("http");
   return `
-    <a class="contact-item reveal reveal--up" style="--reveal-delay: ${100 + index * 85}ms" href="${link.href}"${external ? ' target="_blank" rel="noreferrer"' : ""}>
+    <a class="contact-item reveal reveal--up" style="--reveal-delay: ${18 + index * 20}ms" href="${link.href}"${external ? ' target="_blank" rel="noreferrer"' : ""}>
       <div>
         <div class="contact-item__label">${link.label[currentLang]}</div>
         <div class="contact-item__value">${link.description[currentLang]}</div>
@@ -1357,38 +1359,6 @@ function syncProjectFocus() {
   });
 }
 
-function ensureLenis() {
-  if (!shouldUseEnhancedMotion() || lenisInstance || !window.Lenis || !window.gsap || !window.ScrollTrigger) {
-    return;
-  }
-
-  gsap.registerPlugin(ScrollTrigger);
-  lenisInstance = new Lenis({
-    autoRaf: false,
-    duration: 1.1,
-    smoothWheel: true,
-    smoothTouch: false,
-    anchors: {
-      offset: 96,
-    },
-  });
-
-  lenisInstance.on("scroll", ScrollTrigger.update);
-  if (activeProjectIndex !== null) {
-    lenisInstance.stop?.();
-  }
-
-  if (!lenisTickerAdded) {
-    gsap.ticker.add((time) => {
-      if (lenisInstance) {
-        lenisInstance.raf(time * 1000);
-      }
-    });
-    gsap.ticker.lagSmoothing(0);
-    lenisTickerAdded = true;
-  }
-}
-
 function animateHeroIntro() {
   if (!shouldUseEnhancedMotion() || !window.Motion?.animate) {
     return;
@@ -1399,43 +1369,43 @@ function animateHeroIntro() {
   animate(
     ".hero__copy",
     { opacity: [0, 1], y: [26, 0] },
-    { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__panel",
     { opacity: [0, 1], x: [26, 0], scale: [0.985, 1] },
-    { duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.46, delay: 0.04, ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__role-pill",
     { opacity: [0, 1], scale: [0.94, 1] },
-    { duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.24, delay: 0.08, ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__actions .button",
     { opacity: [0, 1], y: [14, 0] },
-    { duration: 0.45, delay: stagger(0.08), ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.24, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__meta .stat",
     { opacity: [0, 1], y: [16, 0] },
-    { duration: 0.5, delay: stagger(0.08), ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.28, delay: stagger(0.03), ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__panel .panel-card, .hero__panel .panel-item",
     { opacity: [0, 1], y: [14, 0] },
-    { duration: 0.42, delay: stagger(0.06), ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.22, delay: stagger(0.03), ease: [0.22, 1, 0.36, 1] },
   );
 
   animate(
     ".hero__panel .profile-tags .tag",
     { opacity: [0, 1], y: [10, 0] },
-    { duration: 0.32, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] },
+    { duration: 0.18, delay: stagger(0.02), ease: [0.22, 1, 0.36, 1] },
   );
 }
 
@@ -1451,47 +1421,24 @@ function animateProjectModal(modal) {
   const thumbs = modal.querySelectorAll(".project-modal__thumb");
 
   if (panel instanceof HTMLElement) {
-    animate(panel, { opacity: [0, 1], y: [22, 0], scale: [0.985, 1] }, { duration: 0.42, ease: [0.22, 1, 0.36, 1] });
+    animate(panel, { opacity: [0, 1], y: [22, 0], scale: [0.985, 1] }, { duration: 0.24, ease: [0.22, 1, 0.36, 1] });
   }
 
   if (frame instanceof HTMLElement) {
-    animate(frame, { opacity: [0, 1], y: [18, 0], scale: [0.985, 1] }, { duration: 0.45, delay: 0.04, ease: [0.22, 1, 0.36, 1] });
+    animate(frame, { opacity: [0, 1], y: [18, 0], scale: [0.985, 1] }, { duration: 0.26, delay: 0.02, ease: [0.22, 1, 0.36, 1] });
   }
 
   if (sections.length) {
-    animate(sections, { opacity: [0, 1], y: [14, 0] }, { duration: 0.35, delay: stagger(0.05), ease: [0.22, 1, 0.36, 1] });
+    animate(sections, { opacity: [0, 1], y: [14, 0] }, { duration: 0.2, delay: stagger(0.03), ease: [0.22, 1, 0.36, 1] });
   }
 
   if (thumbs.length) {
-    animate(thumbs, { opacity: [0, 1], y: [12, 0] }, { duration: 0.3, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] });
+    animate(thumbs, { opacity: [0, 1], y: [12, 0] }, { duration: 0.18, delay: stagger(0.02), ease: [0.22, 1, 0.36, 1] });
   }
-}
-
-function syncLenisModalState() {
-  if (!lenisInstance) {
-    return;
-  }
-
-  if (activeProjectIndex !== null) {
-    lenisInstance.stop?.();
-    return;
-  }
-
-  lenisInstance.start?.();
 }
 
 function setupPageAnimations() {
-  if (pageAnimationContext) {
-    pageAnimationContext.revert();
-    pageAnimationContext = null;
-  }
-
   if (prefersReducedMotion()) {
-    if (lenisInstance) {
-      lenisInstance.stop?.();
-      lenisInstance = null;
-    }
-
     if (pageRevealObserver) {
       pageRevealObserver.disconnect();
       pageRevealObserver = null;
@@ -1505,111 +1452,7 @@ function setupPageAnimations() {
     return;
   }
 
-  if (!shouldUseEnhancedMotion()) {
-    if (lenisInstance) {
-      lenisInstance.stop?.();
-      lenisInstance = null;
-    }
-
-    document.querySelectorAll(".hero .reveal").forEach((element) => {
-      if (element instanceof HTMLElement) {
-        element.classList.add("is-visible");
-      }
-    });
-    observeReveal();
-    return;
-  }
-
-  if (window.gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-    const useMotionHero = !!window.Motion?.animate;
-    pageAnimationContext = gsap.context(() => {
-      gsap.utils.toArray(".reveal").forEach((element) => {
-        if (!(element instanceof HTMLElement)) {
-          return;
-        }
-
-        if (useMotionHero && element.closest(".hero")) {
-          return;
-        }
-
-        const offset = element.classList.contains("reveal--left")
-          ? { x: -28, y: 18, scale: 0.985 }
-          : element.classList.contains("reveal--right")
-            ? { x: 28, y: 18, scale: 0.985 }
-            : element.classList.contains("reveal--zoom")
-              ? { x: 0, y: 18, scale: 0.96 }
-              : { x: 0, y: 22, scale: 0.985 };
-
-        gsap.fromTo(
-          element,
-          { opacity: 0, ...offset },
-          {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-            duration: 0.85,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: element,
-              start: "top 84%",
-              end: "top 58%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        );
-      });
-
-      gsap.fromTo(
-        ".profile-frame",
-        { y: 0 },
-        {
-          y: -20,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: 0.65,
-          },
-        },
-      );
-
-      gsap.utils.toArray(".project-card").forEach((card) => {
-        if (!(card instanceof HTMLElement)) {
-          return;
-        }
-
-        const image = card.querySelector(".project-card__image");
-        if (image instanceof HTMLElement) {
-          gsap.fromTo(
-            image,
-            { y: 14, scale: 1.04 },
-            {
-              y: 0,
-              scale: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 88%",
-                end: "bottom 18%",
-                scrub: 0.8,
-              },
-            },
-          );
-        }
-      });
-    }, app);
-
-    requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
-    });
-  } else {
-    observeReveal();
-  }
-
-  ensureLenis();
+  observeReveal();
   animateHeroIntro();
 }
 
@@ -1621,7 +1464,6 @@ function syncModalRoot() {
   const copy = getCopy();
   modalRoot.innerHTML = activeProjectIndex !== null ? createProjectModal(copy) : "";
   document.body.classList.toggle("modal-open", activeProjectIndex !== null);
-  syncLenisModalState();
 
   if (activeProjectIndex !== null) {
     animateProjectModal(modalRoot.querySelector(".project-modal"));
@@ -1658,7 +1500,7 @@ function render() {
       <main>
         <section class="hero" id="home">
           <div class="shell hero__grid">
-            <article class="hero__copy reveal reveal--left" style="--reveal-delay: 120ms">
+            <article class="hero__copy reveal reveal--left" style="--reveal-delay: 12ms">
               <h1 class="hero__headline">${copy.hero.title}</h1>
               <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
               <p class="hero__lede">${copy.hero.summary}</p>
@@ -1673,7 +1515,7 @@ function render() {
                 ${copy.hero.stats
                   .map(
                     (stat, index) => `
-                      <div class="stat reveal reveal--up" style="--reveal-delay: ${220 + index * 110}ms">
+                      <div class="stat reveal reveal--up" style="--reveal-delay: ${24 + index * 24}ms">
                         <span class="stat__value">${stat.value}</span>
                         <span class="stat__label">${stat.label}</span>
                       </div>
@@ -1683,7 +1525,7 @@ function render() {
               </div>
             </article>
 
-            <aside class="hero__panel reveal reveal--right" style="--reveal-delay: 180ms" aria-label="${copy.hero.profileTitle}">
+            <aside class="hero__panel reveal reveal--right" style="--reveal-delay: 18ms" aria-label="${copy.hero.profileTitle}">
               <div class="profile-frame">
                 <div class="profile-frame__content">
                   <span class="profile-frame__badge">${copy.hero.profileTitle}</span>
@@ -1708,7 +1550,7 @@ function render() {
         </section>
 
         <section class="section" id="about">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.about.kicker}</p>
@@ -1723,7 +1565,7 @@ function render() {
                   ${copy.about.highlights
                     .map(
                       (item, index) => `
-                        <article class="about-spotlight reveal reveal--up" style="--reveal-delay: ${100 + index * 85}ms">
+                        <article class="about-spotlight reveal reveal--up" style="--reveal-delay: ${18 + index * 20}ms">
                           <h3 class="about-spotlight__title">${item.title}</h3>
                           <p class="about-spotlight__text">${item.text}</p>
                         </article>
@@ -1749,7 +1591,7 @@ function render() {
         </section>
 
         <section class="section" id="projects">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.projects.kicker}</p>
@@ -1764,7 +1606,7 @@ function render() {
         </section>
 
         <section class="section" id="technologies">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.skills.kicker}</p>
@@ -1779,7 +1621,7 @@ function render() {
         </section>
 
         <section class="section" id="experience">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.journey.kicker}</p>
@@ -1795,7 +1637,7 @@ function render() {
 
         <section class="section" id="contact">
           <div class="shell contact-grid">
-            <article class="contact-card reveal reveal--left" style="--reveal-delay: 80ms">
+            <article class="contact-card reveal reveal--left" style="--reveal-delay: 12ms">
               <p class="section-kicker">${copy.contact.kicker}</p>
               <h2 class="section-title">${copy.contact.title}</h2>
               <p class="section-copy">${copy.contact.copy}</p>
@@ -1821,7 +1663,7 @@ function render() {
               </div>
             </article>
 
-            <article class="contact-card reveal reveal--right" style="--reveal-delay: 140ms">
+            <article class="contact-card reveal reveal--right" style="--reveal-delay: 20ms">
               <p class="section-kicker">${copy.contact.formTitle}</p>
               <h2 class="section-title">${copy.contact.formTitle}</h2>
               <form class="contact-form" id="contact-form">
