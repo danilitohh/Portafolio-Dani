@@ -46,9 +46,10 @@ const CONTENT = {
     ],
     hero: {
       eyebrow: "Estudiante de ADSO",
-      title: "Busco prácticas profesionales mientras sigo fortaleciendo mi base técnica.",
+      title: "Construyo bases web con foco en claridad.",
+      summary: "Aporto orden, aprendizaje y una base técnica que sigue creciendo.",
       copy:
-        "Estoy en formación en SENA y construyo proyectos funcionales mientras aprendo a transformar requisitos en soluciones claras. Mi foco actual es HTML, CSS, JavaScript y bases de datos.",
+        "Estoy en formación en SENA y desarrollo proyectos funcionales con HTML, CSS, JavaScript y datos. Me interesa aprender rápido, documentar bien y colaborar con equipos que valoren la claridad.",
       primaryCta: "Ver proyectos",
       secondaryCta: "Contactarme",
       stats: [
@@ -58,7 +59,7 @@ const CONTENT = {
       ],
       profileTitle: "Perfil de practicante",
       profileCaption:
-        "Soy estudiante de ADSO y busco una oportunidad de práctica profesional. Aprendo construyendo y documentando mi trabajo con orden.",
+        "Busco una práctica profesional donde pueda aportar disciplina, aprendizaje y una base real en proyectos funcionales.",
       tags: ["Bilingüe", "Prácticas", "Proyectos funcionales"],
     },
     snapshot: [
@@ -232,9 +233,10 @@ const CONTENT = {
     ],
     hero: {
       eyebrow: "ADSO student",
-      title: "I am looking for internship opportunities while strengthening my technical foundation.",
+      title: "I build web foundations with clarity in mind.",
+      summary: "I bring structure, learning, and a technical base that keeps growing.",
       copy:
-        "I am studying at SENA and building working projects while learning how to turn requirements into clear solutions. My current focus is HTML, CSS, JavaScript, and databases.",
+        "I am studying at SENA and building functional projects with HTML, CSS, JavaScript, and data. I want to learn fast, document well, and collaborate with teams that value clarity.",
       primaryCta: "View projects",
       secondaryCta: "Contact me",
       stats: [
@@ -244,7 +246,7 @@ const CONTENT = {
       ],
       profileTitle: "Internship profile",
       profileCaption:
-        "I am an ADSO student looking for a professional internship. I learn by building and documenting my work carefully.",
+        "I am looking for a professional internship where I can bring discipline, learning, and a real base of functional projects.",
       tags: ["Bilingual", "Internships", "Functional projects"],
     },
     snapshot: [
@@ -573,7 +575,7 @@ function render() {
       <header class="topbar">
         <div class="shell topbar__inner">
           <a class="brand" href="#home" aria-label="${PROFILE.name}">
-            <span class="brand__mark">D</span>
+            <span class="brand__mark" aria-hidden="true">DH</span>
             <span class="brand__text">
               <span class="brand__name">${PROFILE.name}</span>
               <span class="brand__role">${PROFILE.role[currentLang]}</span>
@@ -597,9 +599,10 @@ function render() {
           <div class="shell hero__grid">
             <article class="hero__copy reveal">
               <div class="eyebrow">${copy.hero.eyebrow}</div>
-              <h1 class="hero__name">${PROFILE.name}</h1>
+              <p class="hero__identity">${PROFILE.name}</p>
+              <h1 class="hero__headline">${copy.hero.title}</h1>
               <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
-              <p class="hero__lede">${copy.hero.title}</p>
+              <p class="hero__lede">${copy.hero.summary}</p>
               <p class="hero__copy-text">${copy.hero.copy}</p>
 
               <div class="hero__actions">
