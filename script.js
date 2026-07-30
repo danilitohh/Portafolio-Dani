@@ -477,16 +477,6 @@ const SOCIAL_LINKS = [
     href: PROFILE.github,
     description: { es: "Repositorio y código", en: "Repository and code" },
   },
-  {
-    label: { es: "Correo", en: "Email" },
-    href: `mailto:${PROFILE.email}`,
-    description: { es: "Escríbeme directo", en: "Write to me directly" },
-  },
-  {
-    label: { es: "Teléfono", en: "Phone" },
-    href: `tel:${PROFILE.phone.replace(/\s+/g, "")}`,
-    description: { es: "Llamada directa", en: "Direct call" },
-  },
 ];
 
 const PROJECT_DETAILS = {
@@ -1270,6 +1260,14 @@ function render() {
                   <span class="button button--ghost" aria-hidden="true">${copy.contact.actionLabel}</span>
                 </a>
 
+                <a class="contact-item" href="tel:${PROFILE.phone.replace(/\s+/g, "")}">
+                  <div>
+                    <div class="contact-item__label">${copy.contact.phoneLabel}</div>
+                    <div class="contact-item__value">${PROFILE.phone}</div>
+                  </div>
+                  <span class="button button--ghost" aria-hidden="true">${copy.contact.actionLabel}</span>
+                </a>
+
                 ${SOCIAL_LINKS.map((link, index) => createSocialItem(link, copy, index)).join("")}
               </div>
             </article>
@@ -1315,8 +1313,6 @@ function render() {
           <p>${copy.footer}</p>
           <div class="footer__links">
             <a href="${PROFILE.github}" target="_blank" rel="noreferrer">GitHub</a>
-            <a href="mailto:${PROFILE.email}">${PROFILE.email}</a>
-            <a href="tel:${PROFILE.phone.replace(/\s+/g, "")}">${PROFILE.phone}</a>
           </div>
         </div>
       </footer>
