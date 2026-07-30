@@ -570,6 +570,8 @@ let portraitSwingState = {
   lastMoveTime: 0,
   dragStartX: 0,
   dragStartAngle: -1.35,
+  dragStartShiftX: 0,
+  shiftX: 0,
 };
 
 function prefersReducedMotion() {
@@ -680,6 +682,7 @@ function applyPortraitSwing() {
 
   portraitSwingState.root.style.setProperty("--portrait-tilt", `${portraitSwingState.angle.toFixed(3)}deg`);
   portraitSwingState.root.style.setProperty("--portrait-lift", `${Math.abs(portraitSwingState.angle) * 0.06}px`);
+  portraitSwingState.root.style.setProperty("--portrait-shift-x", `${portraitSwingState.shiftX.toFixed(3)}px`);
 }
 
 function ensurePortraitSwingFrame() {
@@ -706,11 +709,13 @@ function stepPortraitSwing(timestamp) {
     portraitSwingState.velocity += (targetAngle - portraitSwingState.angle) * 0.045 * delta;
     portraitSwingState.velocity *= Math.pow(0.915, delta);
     portraitSwingState.angle += portraitSwingState.velocity * delta;
+    portraitSwingState.shiftX += (0 - portraitSwingState.shiftX) * 0.08 * delta;
   } else {
     portraitSwingState.velocity *= Math.pow(0.9, delta);
   }
 
   portraitSwingState.angle = clampNumber(portraitSwingState.angle, -10.5, 10.5);
+  portraitSwingState.shiftX = clampNumber(portraitSwingState.shiftX, -24, 24);
   applyPortraitSwing();
 
   portraitSwingState.rafId = requestAnimationFrame(stepPortraitSwing);
@@ -745,6 +750,7 @@ function startPortraitDrag(root, pointerId, clientX) {
   portraitSwingState.pointerId = pointerId;
   portraitSwingState.dragStartX = clientX;
   portraitSwingState.dragStartAngle = portraitSwingState.angle;
+  portraitSwingState.dragStartShiftX = portraitSwingState.shiftX;
   portraitSwingState.lastMoveTime = performance.now();
   portraitSwingState.velocity = 0;
   root.classList.add("is-dragging");
@@ -803,12 +809,14 @@ function handlePortraitPointerMove(event) {
   }
 
   const deltaX = event.clientX - portraitSwingState.dragStartX;
-  const nextAngle = clampNumber(portraitSwingState.dragStartAngle + deltaX * 0.085, -10.5, 10.5);
+  const nextAngle = clampNumber(portraitSwingState.dragStartAngle - deltaX * 0.085, -10.5, 10.5);
+  const nextShiftX = clampNumber(portraitSwingState.dragStartShiftX + deltaX * 0.18, -24, 24);
   const now = performance.now();
   const delta = Math.max(now - portraitSwingState.lastMoveTime, 16);
 
   portraitSwingState.velocity = ((nextAngle - portraitSwingState.angle) / (delta / 16.6667)) * 0.35;
   portraitSwingState.angle = nextAngle;
+  portraitSwingState.shiftX = nextShiftX;
   portraitSwingState.lastMoveTime = now;
   applyPortraitSwing();
   ensurePortraitSwingFrame();
