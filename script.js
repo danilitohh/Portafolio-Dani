@@ -475,9 +475,9 @@ function createProjectActions(project, copy) {
   return buttons.length ? `<div class="project-card__links">${buttons.join("")}</div>` : "";
 }
 
-function createProjectCard(project, copy) {
+function createProjectCard(project, copy, index = 0) {
   return `
-    <article class="project-card reveal">
+    <article class="project-card reveal reveal--up" style="--reveal-delay: ${120 + index * 90}ms">
       ${createProjectMedia(project, copy)}
       <div class="project-card__body">
         <div class="project-card__head">
@@ -500,9 +500,9 @@ function createProjectCard(project, copy) {
   `;
 }
 
-function createSkillCard(group) {
+function createSkillCard(group, index = 0) {
   return `
-    <article class="skill-card reveal">
+    <article class="skill-card reveal reveal--up" style="--reveal-delay: ${110 + index * 90}ms">
       <div class="skill-card__head">
         <span class="skill-card__icon">${group.icon}</span>
         <div>
@@ -518,9 +518,10 @@ function createSkillCard(group) {
   `;
 }
 
-function createTimelineCard(item) {
+function createTimelineCard(item, index = 0) {
+  const directionClass = index % 2 === 0 ? "reveal--left" : "reveal--right";
   return `
-    <article class="timeline-card reveal">
+    <article class="timeline-card reveal ${directionClass}" style="--reveal-delay: ${100 + index * 85}ms">
       <div class="timeline-year">${item.year}</div>
       <div>
         <h3 class="timeline-title">${item.title}</h3>
@@ -530,9 +531,9 @@ function createTimelineCard(item) {
   `;
 }
 
-function createSnapshotItem(item) {
+function createSnapshotItem(item, index = 0) {
   return `
-    <div class="panel-item">
+    <div class="panel-item reveal reveal--zoom" style="--reveal-delay: ${140 + index * 85}ms">
       <span class="panel-item__dot" aria-hidden="true"></span>
       <div class="panel-item__content">
         <h3 class="panel-item__title">${item.label}</h3>
@@ -542,10 +543,10 @@ function createSnapshotItem(item) {
   `;
 }
 
-function createSocialItem(link, copy) {
+function createSocialItem(link, copy, index = 0) {
   const external = link.href.startsWith("http");
   return `
-    <a class="contact-item" href="${link.href}"${external ? ' target="_blank" rel="noreferrer"' : ""}>
+    <a class="contact-item reveal reveal--up" style="--reveal-delay: ${100 + index * 85}ms" href="${link.href}"${external ? ' target="_blank" rel="noreferrer"' : ""}>
       <div>
         <div class="contact-item__label">${link.label[currentLang]}</div>
         <div class="contact-item__value">${link.description[currentLang]}</div>
@@ -585,7 +586,7 @@ function render() {
       <main>
         <section class="hero" id="home">
           <div class="shell hero__grid">
-            <article class="hero__copy reveal">
+            <article class="hero__copy reveal reveal--left" style="--reveal-delay: 120ms">
               <h1 class="hero__headline">${copy.hero.title}</h1>
               <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
               <p class="hero__lede">${copy.hero.summary}</p>
@@ -599,8 +600,8 @@ function render() {
               <div class="hero__meta">
                 ${copy.hero.stats
                   .map(
-                    (stat) => `
-                      <div class="stat">
+                    (stat, index) => `
+                      <div class="stat reveal reveal--up" style="--reveal-delay: ${220 + index * 110}ms">
                         <span class="stat__value">${stat.value}</span>
                         <span class="stat__label">${stat.label}</span>
                       </div>
@@ -610,7 +611,7 @@ function render() {
               </div>
             </article>
 
-            <aside class="hero__panel reveal" aria-label="${copy.hero.profileTitle}">
+            <aside class="hero__panel reveal reveal--right" style="--reveal-delay: 180ms" aria-label="${copy.hero.profileTitle}">
               <div class="profile-frame">
                 <div class="profile-frame__content">
                   <span class="profile-frame__badge">${copy.hero.profileTitle}</span>
@@ -635,7 +636,7 @@ function render() {
         </section>
 
         <section class="section" id="about">
-          <div class="shell section-card reveal">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.about.kicker}</p>
@@ -664,7 +665,7 @@ function render() {
         </section>
 
         <section class="section" id="projects">
-          <div class="shell section-card reveal">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.projects.kicker}</p>
@@ -673,13 +674,13 @@ function render() {
             </div>
             <p class="section-copy">${copy.projects.copy}</p>
             <div class="grid-3" style="margin-top: 1.25rem;">
-              ${copy.projects.items.map((project) => createProjectCard(project, copy)).join("")}
+              ${copy.projects.items.map((project, index) => createProjectCard(project, copy, index)).join("")}
             </div>
           </div>
         </section>
 
         <section class="section" id="technologies">
-          <div class="shell section-card reveal">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.skills.kicker}</p>
@@ -688,13 +689,13 @@ function render() {
             </div>
             <p class="section-copy">${copy.skills.copy}</p>
             <div class="grid-3" style="margin-top: 1.25rem;">
-              ${copy.skills.groups.map(createSkillCard).join("")}
+              ${copy.skills.groups.map((group, index) => createSkillCard(group, index)).join("")}
             </div>
           </div>
         </section>
 
         <section class="section" id="experience">
-          <div class="shell section-card reveal">
+          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 80ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.journey.kicker}</p>
@@ -703,14 +704,14 @@ function render() {
             </div>
             <p class="section-copy">${copy.journey.copy}</p>
             <div class="timeline" style="margin-top: 1.25rem;">
-              ${copy.journey.items.map(createTimelineCard).join("")}
+              ${copy.journey.items.map((item, index) => createTimelineCard(item, index)).join("")}
             </div>
           </div>
         </section>
 
         <section class="section" id="contact">
           <div class="shell contact-grid">
-            <article class="contact-card reveal">
+            <article class="contact-card reveal reveal--left" style="--reveal-delay: 80ms">
               <p class="section-kicker">${copy.contact.kicker}</p>
               <h2 class="section-title">${copy.contact.title}</h2>
               <p class="section-copy">${copy.contact.copy}</p>
@@ -724,11 +725,11 @@ function render() {
                   <span class="button button--ghost" aria-hidden="true">${copy.contact.actionLabel}</span>
                 </a>
 
-                ${SOCIAL_LINKS.map((link) => createSocialItem(link, copy)).join("")}
+                ${SOCIAL_LINKS.map((link, index) => createSocialItem(link, copy, index)).join("")}
               </div>
             </article>
 
-            <article class="contact-card reveal">
+            <article class="contact-card reveal reveal--right" style="--reveal-delay: 140ms">
               <p class="section-kicker">${copy.contact.formTitle}</p>
               <h2 class="section-title">${copy.contact.formTitle}</h2>
               <form class="contact-form" id="contact-form">
