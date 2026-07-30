@@ -572,14 +572,6 @@ function render() {
     <div class="page">
       <header class="topbar">
         <div class="shell topbar__inner">
-          <a class="brand" href="#home" aria-label="${PROFILE.name}">
-            <span class="brand__mark" aria-hidden="true">DH</span>
-            <span class="brand__text">
-              <span class="brand__name">${PROFILE.name}</span>
-              <span class="brand__role">${PROFILE.role[currentLang]}</span>
-            </span>
-          </a>
-
           <div class="topbar__actions">
             <nav class="nav" aria-label="Primary">
               ${copy.nav.map(createNavItem).join("")}
