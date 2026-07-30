@@ -106,12 +106,22 @@ const CONTENT = {
         "Cada tarjeta incluye una imagen, la demo en vivo y el repositorio en GitHub para revisar cada proyecto con contexto.",
       liveCta: "Ver proyecto",
       repoCta: "Ver repositorio",
+      detailCta: "Ver detalles",
+      modalClose: "Cerrar detalle",
+      modalGallery: "Galería",
+      modalGalleryHint: "Toca una miniatura para ampliar la vista.",
+      modalCapabilities: "Qué permite",
+      modalStack: "Tecnologías y base técnica",
+      modalLinks: "Enlaces del proyecto",
+      modalPrev: "Anterior",
+      modalNext: "Siguiente",
       imageFallbackTitle: "Agrega una captura",
       imageFallbackText: "Usa una ruta local como assets/projects/proyecto-01.jpg.",
       items: [
         {
           index: "01",
           type: "Tienda online",
+          slug: "ambrosia-bhang",
           title: "Tienda online - Ambrosia Bhang",
           image: "assets/projects/ambrosia-bhang/cover.png",
           imageAlt: "Vista previa de la tienda online Ambrosia Bhang",
@@ -125,6 +135,7 @@ const CONTENT = {
         {
           index: "02",
           type: "Sistema veterinario",
+          slug: "lativet",
           title: "Sistema veterinario - Lativet",
           image: "assets/projects/lativet/cover.png",
           imageAlt: "Vista previa del sistema veterinario Lativet",
@@ -138,6 +149,7 @@ const CONTENT = {
         {
           index: "03",
           type: "Seguimiento por Gmail",
+          slug: "hessa-enterprises",
           title: "Sistema de seguimiento por Gmail - Hessa Enterprises",
           image: "assets/projects/hessa-enterprises/cover.png",
           imageAlt: "Vista previa del sistema de seguimiento por Gmail Hessa Enterprises",
@@ -151,6 +163,7 @@ const CONTENT = {
         {
           index: "04",
           type: "Contaduría",
+          slug: "contaduria-juliana",
           title: "Contaduría - Juliana",
           image: "assets/projects/contaduria-juliana/cover.png",
           imageAlt: "Vista previa del sistema de contaduría Juliana",
@@ -318,12 +331,22 @@ const CONTENT = {
         "Each card includes an image, a live demo, and the GitHub repository so you can review each project in context.",
       liveCta: "View project",
       repoCta: "View repository",
+      detailCta: "View details",
+      modalClose: "Close details",
+      modalGallery: "Gallery",
+      modalGalleryHint: "Use the thumbnails to expand the view.",
+      modalCapabilities: "What it lets you do",
+      modalStack: "Technologies and base",
+      modalLinks: "Project links",
+      modalPrev: "Previous",
+      modalNext: "Next",
       imageFallbackTitle: "Add an image",
       imageFallbackText: "Use a local path like assets/projects/project-01.jpg.",
       items: [
         {
           index: "01",
           type: "Online store",
+          slug: "ambrosia-bhang",
           title: "Online store - Ambrosia Bhang",
           image: "assets/projects/ambrosia-bhang/cover.png",
           imageAlt: "Preview of the Ambrosia Bhang online store",
@@ -337,6 +360,7 @@ const CONTENT = {
         {
           index: "02",
           type: "Veterinary system",
+          slug: "lativet",
           title: "Veterinary system - Lativet",
           image: "assets/projects/lativet/cover.png",
           imageAlt: "Preview of the Lativet veterinary system",
@@ -350,6 +374,7 @@ const CONTENT = {
         {
           index: "03",
           type: "Gmail follow-up system",
+          slug: "hessa-enterprises",
           title: "Gmail follow-up system - Hessa Enterprises",
           image: "assets/projects/hessa-enterprises/cover.png",
           imageAlt: "Preview of the Hessa Enterprises Gmail follow-up system",
@@ -363,6 +388,7 @@ const CONTENT = {
         {
           index: "04",
           type: "Accounting",
+          slug: "contaduria-juliana",
           title: "Accounting - Juliana",
           image: "assets/projects/contaduria-juliana/cover.png",
           imageAlt: "Preview of the Juliana accounting system",
@@ -460,6 +486,10 @@ const app = document.querySelector("#app");
 const storedLang = localStorage.getItem(STORAGE_KEY);
 const browserLang = navigator.language?.toLowerCase().startsWith("es") ? "es" : "en";
 let currentLang = SUPPORTED_LANGS.has(storedLang) ? storedLang : browserLang;
+let activeProjectIndex = null;
+let activeProjectImageIndex = 0;
+let pendingProjectFocusIndex = null;
+let appInteractionsBound = false;
 
 const SOCIAL_LINKS = [
   {
@@ -479,6 +509,454 @@ const SOCIAL_LINKS = [
   },
 ];
 
+const PROJECT_DETAILS = {
+  "ambrosia-bhang": {
+    gallery: [
+      {
+        src: "assets/projects/ambrosia-bhang/cover.png",
+        alt: {
+          es: "Portada principal de la tienda online Ambrosia Bhang",
+          en: "Main cover for the Ambrosia Bhang online store",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/brand-logo.jpeg",
+        alt: {
+          es: "Logo de marca de Ambrosia Bhang",
+          en: "Ambrosia Bhang brand logo",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/banner-1.jpeg",
+        alt: {
+          es: "Banner promocional de Ambrosia Bhang",
+          en: "Ambrosia Bhang promotional banner",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/banner-2.jpeg",
+        alt: {
+          es: "Vista visual de fondo de Ambrosia Bhang",
+          en: "Ambrosia Bhang background visual",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/banner-3.jpeg",
+        alt: {
+          es: "Segunda vista visual de fondo de Ambrosia Bhang",
+          en: "Second background visual for Ambrosia Bhang",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-1.jpeg",
+        alt: {
+          es: "Producto 1 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 1",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-2.jpeg",
+        alt: {
+          es: "Producto 2 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 2",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-3.jpeg",
+        alt: {
+          es: "Producto 3 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 3",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-4.jpeg",
+        alt: {
+          es: "Producto 4 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 4",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-5.jpeg",
+        alt: {
+          es: "Producto 5 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 5",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-6.jpeg",
+        alt: {
+          es: "Producto 6 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 6",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-7.jpeg",
+        alt: {
+          es: "Producto 7 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 7",
+        },
+      },
+      {
+        src: "assets/projects/ambrosia-bhang/product-8.jpeg",
+        alt: {
+          es: "Producto 8 de Ambrosia Bhang",
+          en: "Ambrosia Bhang product 8",
+        },
+      },
+    ],
+    es: {
+      overview:
+        "Tienda online enfocada en catálogo, presentación de productos y un flujo de compra claro. También contempla una base administrativa para promociones, autenticación y cobros.",
+      capabilitiesTitle: "Qué permite",
+      capabilities: [
+        "Explorar catálogo y destacar productos con una navegación limpia.",
+        "Revisar promociones, banners y piezas visuales del negocio.",
+        "Sostener un flujo de compra y checkout con Stripe.",
+        "Administrar productos y ajustes desde una base preparada para panel interno.",
+      ],
+      stackTitle: "Tecnologías y base técnica",
+      stack: ["Next.js", "React", "TypeScript", "Prisma", "NextAuth", "Stripe"],
+      galleryTitle: "Galería completa",
+      galleryHint: "Abre una miniatura para ver más contexto del proyecto.",
+      note: "Una base de comercio electrónico pensada para verse confiable, ordenada y lista para crecer.",
+    },
+    en: {
+      overview:
+        "An online store focused on product browsing, visual presentation, and a clear purchase flow. It also supports an administrative base for promotions, authentication, and payments.",
+      capabilitiesTitle: "What it lets you do",
+      capabilities: [
+        "Explore the catalog and highlight products through a clean browsing experience.",
+        "Review promotions, banners, and brand visuals.",
+        "Support purchase and checkout flows with Stripe.",
+        "Manage products and settings from a base ready for an internal admin panel.",
+      ],
+      stackTitle: "Technologies and base",
+      stack: ["Next.js", "React", "TypeScript", "Prisma", "NextAuth", "Stripe"],
+      galleryTitle: "Full gallery",
+      galleryHint: "Open any thumbnail to get more context about the project.",
+      note: "An e-commerce base designed to feel trustworthy, organized, and ready to scale.",
+    },
+  },
+  lativet: {
+    gallery: [
+      {
+        src: "assets/projects/lativet/cover.png",
+        alt: {
+          es: "Portada principal del sistema veterinario Lativet",
+          en: "Main cover for the Lativet veterinary system",
+        },
+      },
+      {
+        src: "assets/projects/lativet/agenda-del-dia.png",
+        alt: {
+          es: "Agenda del día en Lativet",
+          en: "Daily agenda in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/pacientes-e-historias.png",
+        alt: {
+          es: "Pacientes e historias clínicas en Lativet",
+          en: "Patients and medical histories in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/consentimientos.png",
+        alt: {
+          es: "Consentimientos en Lativet",
+          en: "Consent forms in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/crear-cotizacion.png",
+        alt: {
+          es: "Creación de cotización en Lativet",
+          en: "Quote creation in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/crear-factura.png",
+        alt: {
+          es: "Creación de factura en Lativet",
+          en: "Invoice creation in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/revisar-inventario.png",
+        alt: {
+          es: "Revisión de inventario en Lativet",
+          en: "Inventory review in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/usuarios-y-permisos.png",
+        alt: {
+          es: "Usuarios y permisos en Lativet",
+          en: "Users and permissions in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/ver-reportes.png",
+        alt: {
+          es: "Reportes en Lativet",
+          en: "Reports in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/registrar-abono.png",
+        alt: {
+          es: "Registro de abonos en Lativet",
+          en: "Payment registration in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/registrar-ingreso-o-gasto.png",
+        alt: {
+          es: "Registro de ingreso o gasto en Lativet",
+          en: "Income or expense registration in Lativet",
+        },
+      },
+      {
+        src: "assets/projects/lativet/peluqueria.png",
+        alt: {
+          es: "Módulo de peluquería en Lativet",
+          en: "Grooming module in Lativet",
+        },
+      },
+    ],
+    es: {
+      overview:
+        "Sistema veterinario para centralizar agenda, historiales, consentimientos, inventario, facturación y reportes en un flujo operativo claro.",
+      capabilitiesTitle: "Qué permite",
+      capabilities: [
+        "Registrar pacientes y propietarios con contexto clínico.",
+        "Consultar agenda del día, historias y consentimientos.",
+        "Generar cotizaciones, facturas y abonos de forma organizada.",
+        "Revisar inventario, ingresos, gastos, usuarios, permisos y reportes.",
+      ],
+      stackTitle: "Tecnologías y base técnica",
+      stack: ["HTML", "CSS", "JavaScript", "Python", "Flask", "SQLite", "ReportLab", "Pillow"],
+      galleryTitle: "Galería completa",
+      galleryHint: "Explora las diferentes pantallas del sistema y su flujo interno.",
+      note: "Construido para acompañar el trabajo diario de una clínica veterinaria con una interfaz de operación rápida.",
+    },
+    en: {
+      overview:
+        "A veterinary system that centralizes scheduling, medical histories, consent forms, inventory, billing, and reporting in a clear operational flow.",
+      capabilitiesTitle: "What it lets you do",
+      capabilities: [
+        "Register patients and owners with clinical context.",
+        "Review daily agenda, medical history, and consent documents.",
+        "Generate quotes, invoices, and payments in an organized flow.",
+        "Check inventory, income, expenses, users, permissions, and reports.",
+      ],
+      stackTitle: "Technologies and base",
+      stack: ["HTML", "CSS", "JavaScript", "Python", "Flask", "SQLite", "ReportLab", "Pillow"],
+      galleryTitle: "Full gallery",
+      galleryHint: "Explore the different screens and internal workflow of the system.",
+      note: "Built to support the daily work of a veterinary clinic with a fast operational interface.",
+    },
+  },
+  "hessa-enterprises": {
+    gallery: [
+      {
+        src: "assets/projects/hessa-enterprises/cover.png",
+        alt: {
+          es: "Portada principal de Hessa Enterprises",
+          en: "Main cover for Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/hero.png",
+        alt: {
+          es: "Hero visual de Hessa Enterprises",
+          en: "Hessa Enterprises hero visual",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/logo.png",
+        alt: {
+          es: "Logo principal de Hessa Enterprises",
+          en: "Hessa Enterprises main logo",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/logo-wordmark.png",
+        alt: {
+          es: "Marca tipográfica de Hessa Enterprises",
+          en: "Hessa Enterprises wordmark",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/appointment-management.png",
+        alt: {
+          es: "Gestión de citas en Hessa Enterprises",
+          en: "Appointment management in Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/browser-access.png",
+        alt: {
+          es: "Acceso desde navegador en Hessa Enterprises",
+          en: "Browser access in Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/client-history.png",
+        alt: {
+          es: "Historial de clientes en Hessa Enterprises",
+          en: "Client history in Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/email-follow-up.png",
+        alt: {
+          es: "Seguimiento por correo en Hessa Enterprises",
+          en: "Email follow-up in Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/per-user-workspace.png",
+        alt: {
+          es: "Espacio por usuario en Hessa Enterprises",
+          en: "Per-user workspace in Hessa Enterprises",
+        },
+      },
+      {
+        src: "assets/projects/hessa-enterprises/proposal-pipeline.png",
+        alt: {
+          es: "Pipeline de propuestas en Hessa Enterprises",
+          en: "Proposal pipeline in Hessa Enterprises",
+        },
+      },
+    ],
+    es: {
+      overview:
+        "Workspace de seguimiento comercial que centraliza clientes, correos, plantillas, tareas y próximos contactos para no perder ninguna oportunidad.",
+      capabilitiesTitle: "Qué permite",
+      capabilities: [
+        "Organizar clientes y su estado de seguimiento en un solo lugar.",
+        "Crear correos con plantillas y abrir borradores listos para enviar.",
+        "Programar el próximo contacto y mantener trazabilidad del proceso.",
+        "Trabajar con Supabase Auth y flujo por usuario para escalar la operación.",
+      ],
+      stackTitle: "Tecnologías y base técnica",
+      stack: ["React", "TypeScript", "Vite", "Supabase", "Gmail API", "Supabase JS"],
+      galleryTitle: "Galería completa",
+      galleryHint: "Explora los bloques de producto que explican la propuesta completa.",
+      note: "Una base para seguimiento comercial y productividad, pensada para trabajar con orden y continuidad.",
+    },
+    en: {
+      overview:
+        "A sales follow-up workspace that centralizes clients, emails, templates, tasks, and next contact dates so no opportunity slips through.",
+      capabilitiesTitle: "What it lets you do",
+      capabilities: [
+        "Organize clients and follow-up status in one place.",
+        "Compose emails with templates and open drafts ready to send.",
+        "Schedule the next contact and keep the process traceable.",
+        "Work with Supabase Auth and per-user flows for a scalable operation.",
+      ],
+      stackTitle: "Technologies and base",
+      stack: ["React", "TypeScript", "Vite", "Supabase", "Gmail API", "Supabase JS"],
+      galleryTitle: "Full gallery",
+      galleryHint: "Explore the product blocks that explain the full proposal.",
+      note: "A base for sales follow-up and productivity, designed to keep work organized and continuous.",
+    },
+  },
+  "contaduria-juliana": {
+    gallery: [
+      {
+        src: "assets/projects/contaduria-juliana/cover.png",
+        alt: {
+          es: "Portada principal de Contaduría - Juliana",
+          en: "Main cover for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/company-selector.png",
+        alt: {
+          es: "Selector de empresa de Contaduría - Juliana",
+          en: "Company selector for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/dashboard-home.png",
+        alt: {
+          es: "Dashboard principal de Contaduría - Juliana",
+          en: "Main dashboard for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/products.png",
+        alt: {
+          es: "Módulo de productos de Contaduría - Juliana",
+          en: "Products module for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/invoices.png",
+        alt: {
+          es: "Módulo de facturas de Contaduría - Juliana",
+          en: "Invoices module for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/pos.png",
+        alt: {
+          es: "Punto de venta de Contaduría - Juliana",
+          en: "POS screen for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/configuracion.png",
+        alt: {
+          es: "Configuración de Contaduría - Juliana",
+          en: "Settings screen for Accounting - Juliana",
+        },
+      },
+      {
+        src: "assets/projects/contaduria-juliana/reports.png",
+        alt: {
+          es: "Reportes de Contaduría - Juliana",
+          en: "Reports screen for Accounting - Juliana",
+        },
+      },
+    ],
+    es: {
+      overview:
+        "Plataforma administrativa tipo ERP/CRM para centralizar empresas, ventas, inventario, cartera, gastos, nómina, POS, cotizaciones y reportes.",
+      capabilitiesTitle: "Qué permite",
+      capabilities: [
+        "Elegir una empresa y trabajar en contexto por negocio.",
+        "Registrar productos, clientes, proveedores y bodegas.",
+        "Administrar facturas, POS, cotizaciones, pagos, cartera y gastos.",
+        "Revisar gráficos, reportes y configuración en un panel modular.",
+      ],
+      stackTitle: "Tecnologías y base técnica",
+      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "Recharts", "jsPDF", "Zod"],
+      galleryTitle: "Galería completa",
+      galleryHint: "Revisa las pantallas principales y módulos administrativos del sistema.",
+      note: "Pensado como una base administrativa modular y escalable para operación contable y comercial.",
+    },
+    en: {
+      overview:
+        "An ERP/CRM-style admin platform for centralizing companies, sales, inventory, receivables, expenses, payroll, POS, quotes, and reporting.",
+      capabilitiesTitle: "What it lets you do",
+      capabilities: [
+        "Choose a company and work within the correct business context.",
+        "Register products, clients, suppliers, and warehouses.",
+        "Manage invoices, POS, quotes, payments, receivables, and expenses.",
+        "Review charts, reports, and settings inside a modular dashboard.",
+      ],
+      stackTitle: "Technologies and base",
+      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "Recharts", "jsPDF", "Zod"],
+      galleryTitle: "Full gallery",
+      galleryHint: "Review the main screens and administrative modules of the system.",
+      note: "Designed as a modular, scalable administrative base for accounting and commercial operations.",
+    },
+  },
+};
+
 function getCopy() {
   return CONTENT[currentLang];
 }
@@ -489,6 +967,82 @@ function createNavItem(item) {
 
 function createTag(tag) {
   return `<span class="tag">${tag}</span>`;
+}
+
+function getProjectDetail(project) {
+  const details = PROJECT_DETAILS[project.slug];
+  return details?.[currentLang] || details?.es || null;
+}
+
+function getProjectGallery(project) {
+  return PROJECT_DETAILS[project.slug]?.gallery || [];
+}
+
+function clampProjectImageIndex(project, index) {
+  const gallery = getProjectGallery(project);
+  if (!gallery.length) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(index, gallery.length - 1));
+}
+
+function openProjectModal(index, imageIndex = 0) {
+  const copy = getCopy();
+  const project = copy.projects.items[index];
+  if (!project) {
+    return;
+  }
+
+  activeProjectIndex = index;
+  activeProjectImageIndex = clampProjectImageIndex(project, imageIndex);
+  render();
+}
+
+function closeProjectModal() {
+  if (activeProjectIndex === null) {
+    return;
+  }
+
+  pendingProjectFocusIndex = activeProjectIndex;
+  activeProjectIndex = null;
+  activeProjectImageIndex = 0;
+  render();
+}
+
+function setActiveProjectImage(index) {
+  if (activeProjectIndex === null) {
+    return;
+  }
+
+  const copy = getCopy();
+  const project = copy.projects.items[activeProjectIndex];
+  if (!project) {
+    return;
+  }
+
+  activeProjectImageIndex = clampProjectImageIndex(project, index);
+  render();
+}
+
+function stepProjectImage(direction) {
+  if (activeProjectIndex === null) {
+    return;
+  }
+
+  const copy = getCopy();
+  const project = copy.projects.items[activeProjectIndex];
+  if (!project) {
+    return;
+  }
+
+  const gallery = getProjectGallery(project);
+  if (!gallery.length) {
+    return;
+  }
+
+  const nextIndex = (activeProjectImageIndex + direction + gallery.length) % gallery.length;
+  setActiveProjectImage(nextIndex);
 }
 
 function createProjectMedia(project, copy) {
@@ -529,7 +1083,7 @@ function createProjectActions(project, copy) {
 
 function createProjectCard(project, copy, index = 0) {
   return `
-    <article class="project-card reveal reveal--up" style="--reveal-delay: ${120 + index * 90}ms">
+    <article class="project-card reveal reveal--up" style="--reveal-delay: ${120 + index * 90}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
       ${createProjectMedia(project, copy)}
       <div class="project-card__body">
         <div class="project-card__head">
@@ -545,10 +1099,115 @@ function createProjectCard(project, copy, index = 0) {
         </div>
         <div class="project-card__footer">
           <small>${project.footer}</small>
+          <button class="project-card__open" type="button" data-project-open="${index}">
+            <span>${copy.projects.detailCta}</span>
+            <span aria-hidden="true">↗</span>
+          </button>
         </div>
         ${createProjectActions(project, copy)}
       </div>
     </article>
+  `;
+}
+
+function createProjectThumb(image, index, isActive) {
+  const alt = image.alt[currentLang];
+  return `
+    <button
+      class="project-modal__thumb ${isActive ? "is-active" : ""}"
+      type="button"
+      data-project-thumb="${index}"
+      aria-label="${alt}"
+      aria-current="${isActive ? "true" : "false"}"
+    >
+      <img class="project-modal__thumb-image" src="${image.src}" alt="${alt}" loading="lazy" />
+    </button>
+  `;
+}
+
+function createProjectModal(copy) {
+  if (activeProjectIndex === null) {
+    return "";
+  }
+
+  const project = copy.projects.items[activeProjectIndex];
+  const detail = getProjectDetail(project);
+  const gallery = getProjectGallery(project);
+
+  if (!project || !detail) {
+    return "";
+  }
+
+  const activeImage = gallery[activeProjectImageIndex] || gallery[0];
+  const activeImageAlt = activeImage?.alt?.[currentLang] || project.imageAlt;
+  const imageCountLabel = gallery.length ? `${activeProjectImageIndex + 1}/${gallery.length}` : "1/1";
+
+  return `
+    <div class="project-modal" role="presentation" aria-hidden="false">
+      <div class="project-modal__backdrop" data-project-close></div>
+      <div class="shell project-modal__panel" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+        <button class="project-modal__close" type="button" data-project-close-primary data-project-close aria-label="${copy.projects.modalClose}">×</button>
+
+        <div class="project-modal__header">
+          <div>
+            <p class="project-modal__kicker">${project.type}</p>
+            <h3 class="project-modal__title" id="project-modal-title">${project.title}</h3>
+          </div>
+          <span class="project-modal__index">${project.index}</span>
+        </div>
+
+        <p class="project-modal__summary">${project.summary}</p>
+        <p class="project-modal__copy">${detail.overview}</p>
+
+        <div class="project-modal__layout">
+          <div class="project-modal__gallery">
+            <div class="project-modal__frame">
+              ${activeImage ? `<img class="project-modal__image" src="${activeImage.src}" alt="${activeImageAlt}" loading="eager" />` : ""}
+              <div class="project-modal__frame-topline">
+                <span>${copy.projects.modalGallery}</span>
+                <span>${imageCountLabel}</span>
+              </div>
+              ${gallery.length > 1 ? `
+                <div class="project-modal__nav">
+                  <button class="project-modal__nav-button" type="button" data-project-nav="prev" aria-label="${copy.projects.modalPrev}">‹</button>
+                  <button class="project-modal__nav-button" type="button" data-project-nav="next" aria-label="${copy.projects.modalNext}">›</button>
+                </div>
+              ` : ""}
+            </div>
+            <div class="project-modal__thumbs" aria-label="${copy.projects.modalGallery}">
+              ${gallery.map((image, galleryIndex) => createProjectThumb(image, galleryIndex, galleryIndex === activeProjectImageIndex)).join("")}
+            </div>
+            <p class="project-modal__hint">${detail.galleryHint}</p>
+          </div>
+
+          <div class="project-modal__content">
+            <section class="project-modal__section">
+              <p class="project-modal__section-label">${detail.capabilitiesTitle}</p>
+              <ul class="project-modal__list">
+                ${detail.capabilities.map((item) => `<li>${item}</li>`).join("")}
+              </ul>
+            </section>
+
+            <section class="project-modal__section">
+              <p class="project-modal__section-label">${detail.stackTitle}</p>
+              <div class="chip-row">
+                ${detail.stack.map(createTag).join("")}
+              </div>
+            </section>
+
+            <section class="project-modal__section">
+              <p class="project-modal__section-label">${copy.projects.modalLinks}</p>
+              <div class="project-modal__links">
+                ${project.liveUrl ? `<a class="project-link project-link--primary" href="${project.liveUrl}" target="_blank" rel="noreferrer">${copy.projects.liveCta}</a>` : ""}
+                ${project.repoUrl ? `<a class="project-link" href="${project.repoUrl}" target="_blank" rel="noreferrer">${copy.projects.repoCta}</a>` : ""}
+              </div>
+            </section>
+
+            <p class="project-modal__note">${detail.note}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -606,6 +1265,29 @@ function createSocialItem(link, copy, index = 0) {
       <span class="button button--ghost" aria-hidden="true">${copy.contact.actionLabel}</span>
     </a>
   `;
+}
+
+function syncProjectFocus() {
+  requestAnimationFrame(() => {
+    if (activeProjectIndex !== null) {
+      const closeButton = document.querySelector("[data-project-close-primary]");
+      if (closeButton instanceof HTMLElement) {
+        closeButton.focus();
+      }
+      return;
+    }
+
+    if (pendingProjectFocusIndex === null) {
+      return;
+    }
+
+    const trigger = document.querySelector(`[data-project-open="${pendingProjectFocusIndex}"]`);
+    if (trigger instanceof HTMLElement) {
+      trigger.focus();
+    }
+
+    pendingProjectFocusIndex = null;
+  });
 }
 
 function render() {
@@ -840,13 +1522,23 @@ function render() {
         </div>
       </footer>
     </div>
+    ${createProjectModal(copy)}
   `;
 
+  document.body.classList.toggle("modal-open", activeProjectIndex !== null);
   bindEvents();
   observeReveal();
+  syncProjectFocus();
 }
 
 function bindEvents() {
+  if (!appInteractionsBound) {
+    app.addEventListener("click", handleProjectInteractions);
+    app.addEventListener("keydown", handleProjectKeydown);
+    window.addEventListener("keydown", handleModalKeydown);
+    appInteractionsBound = true;
+  }
+
   document.querySelectorAll("[data-lang]").forEach((button) => {
     button.addEventListener("click", () => {
       const nextLang = button.dataset.lang;
@@ -891,6 +1583,95 @@ function bindEvents() {
     });
   }
 
+}
+
+function handleProjectInteractions(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  if (target.closest(".project-link")) {
+    return;
+  }
+
+  const closeTrigger = target.closest("[data-project-close]");
+  if (closeTrigger) {
+    event.preventDefault();
+    closeProjectModal();
+    return;
+  }
+
+  const thumbTrigger = target.closest("[data-project-thumb]");
+  if (thumbTrigger) {
+    event.preventDefault();
+    const index = Number(thumbTrigger.dataset.projectThumb);
+    if (Number.isInteger(index)) {
+      setActiveProjectImage(index);
+    }
+    return;
+  }
+
+  const navTrigger = target.closest("[data-project-nav]");
+  if (navTrigger) {
+    event.preventDefault();
+    stepProjectImage(navTrigger.dataset.projectNav === "prev" ? -1 : 1);
+    return;
+  }
+
+  const projectTrigger = target.closest("[data-project-open]");
+  if (!projectTrigger) {
+    return;
+  }
+
+  const index = Number(projectTrigger.dataset.projectOpen);
+  if (Number.isInteger(index)) {
+    openProjectModal(index);
+  }
+}
+
+function handleProjectKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  if (!target.matches("article[data-project-open]")) {
+    return;
+  }
+
+  event.preventDefault();
+  const index = Number(target.dataset.projectOpen);
+  if (Number.isInteger(index)) {
+    openProjectModal(index);
+  }
+}
+
+function handleModalKeydown(event) {
+  if (activeProjectIndex === null) {
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeProjectModal();
+    return;
+  }
+
+  if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    stepProjectImage(-1);
+    return;
+  }
+
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    stepProjectImage(1);
+  }
 }
 
 function observeReveal() {
