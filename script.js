@@ -475,9 +475,262 @@ let pageAnimationContext = null;
 let pageRevealObserver = null;
 let lenisInstance = null;
 let lenisTickerAdded = false;
+let waterCursorState = {
+  initialized: false,
+  root: null,
+  halo: null,
+  ripple: null,
+  core: null,
+  visible: false,
+  hovering: false,
+  pressed: false,
+  enabled: false,
+  targetX: 0,
+  targetY: 0,
+  haloX: 0,
+  haloY: 0,
+  rippleX: 0,
+  rippleY: 0,
+  coreX: 0,
+  coreY: 0,
+  lastX: 0,
+  lastY: 0,
+  lastRippleAt: 0,
+  frameId: 0,
+};
 
 function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+}
+
+function supportsWaterCursor() {
+  return !prefersReducedMotion() && window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches;
+}
+
+function createWaterCursor() {
+  if (waterCursorState.root) {
+    return;
+  }
+
+  const root = document.createElement("div");
+  root.id = "water-cursor";
+  root.className = "water-cursor";
+  root.setAttribute("aria-hidden", "true");
+  root.innerHTML = `
+    <span class="water-cursor__halo"></span>
+    <span class="water-cursor__ripple"></span>
+    <span class="water-cursor__core"></span>
+  `;
+
+  document.body.appendChild(root);
+  waterCursorState.root = root;
+  waterCursorState.halo = root.querySelector(".water-cursor__halo");
+  waterCursorState.ripple = root.querySelector(".water-cursor__ripple");
+  waterCursorState.core = root.querySelector(".water-cursor__core");
+}
+
+function removeWaterCursor() {
+  if (waterCursorState.frameId) {
+    cancelAnimationFrame(waterCursorState.frameId);
+    waterCursorState.frameId = 0;
+  }
+
+  if (waterCursorState.initialized) {
+    window.removeEventListener("pointermove", handleWaterPointerMove);
+    window.removeEventListener("pointerdown", handleWaterPointerDown);
+    window.removeEventListener("pointerup", handleWaterPointerUp);
+    window.removeEventListener("pointercancel", handleWaterPointerUp);
+    window.removeEventListener("blur", handleWaterPointerUp);
+    document.removeEventListener("visibilitychange", handleWaterVisibilityChange);
+  }
+
+  waterCursorState.root?.remove();
+  waterCursorState = {
+    initialized: false,
+    root: null,
+    halo: null,
+    ripple: null,
+    core: null,
+    visible: false,
+    hovering: false,
+    pressed: false,
+    enabled: false,
+    targetX: 0,
+    targetY: 0,
+    haloX: 0,
+    haloY: 0,
+    rippleX: 0,
+    rippleY: 0,
+    coreX: 0,
+    coreY: 0,
+    lastX: 0,
+    lastY: 0,
+    lastRippleAt: 0,
+    frameId: 0,
+  };
+  document.body.classList.remove("has-water-cursor");
+}
+
+function spawnWaterRipple(x, y, size = 1) {
+  if (!waterCursorState.root) {
+    return;
+  }
+
+  const ripple = document.createElement("span");
+  ripple.className = "water-cursor__wave";
+  ripple.style.left = `${x}px`;
+  ripple.style.top = `${y}px`;
+  const diameter = Math.max(24, 28 * size);
+  ripple.style.width = `${diameter}px`;
+  ripple.style.height = `${diameter}px`;
+
+  waterCursorState.root.appendChild(ripple);
+  ripple.addEventListener(
+    "animationend",
+    () => {
+      ripple.remove();
+    },
+    { once: true },
+  );
+}
+
+function updateWaterCursorClasses(target) {
+  if (!waterCursorState.root) {
+    return;
+  }
+
+  const interactive = target instanceof HTMLElement ? target.closest("a, button, [role='button'], summary, [data-project-open], [data-project-nav], [data-project-close]") : null;
+  const textField = target instanceof HTMLElement ? target.closest("input, textarea, select, [contenteditable='true']") : null;
+
+  waterCursorState.hovering = Boolean(interactive);
+  waterCursorState.root.classList.toggle("is-hovering", waterCursorState.hovering);
+  waterCursorState.root.classList.toggle("is-text", Boolean(textField));
+}
+
+function handleWaterPointerMove(event) {
+  if (!waterCursorState.enabled || !waterCursorState.root) {
+    return;
+  }
+
+  waterCursorState.visible = true;
+  waterCursorState.targetX = event.clientX;
+  waterCursorState.targetY = event.clientY;
+  updateWaterCursorClasses(event.target);
+
+  const moved = Math.hypot(event.clientX - waterCursorState.lastX, event.clientY - waterCursorState.lastY);
+  const now = performance.now();
+  if (moved > 12 && now - waterCursorState.lastRippleAt > 70) {
+    const intensity = Math.min(1.35, 0.9 + moved / 140);
+    spawnWaterRipple(event.clientX, event.clientY, intensity);
+    waterCursorState.lastRippleAt = now;
+  }
+
+  waterCursorState.lastX = event.clientX;
+  waterCursorState.lastY = event.clientY;
+
+  if (waterCursorState.root) {
+    waterCursorState.root.classList.add("is-visible");
+  }
+
+  if (!waterCursorState.frameId) {
+    waterCursorState.frameId = requestAnimationFrame(stepWaterCursor);
+  }
+}
+
+function handleWaterPointerDown(event) {
+  if (!waterCursorState.enabled || !waterCursorState.root) {
+    return;
+  }
+
+  waterCursorState.pressed = true;
+  waterCursorState.root.classList.add("is-pressed");
+  spawnWaterRipple(event.clientX, event.clientY, 1.7);
+}
+
+function handleWaterPointerUp() {
+  if (!waterCursorState.root) {
+    return;
+  }
+
+  waterCursorState.pressed = false;
+  waterCursorState.root.classList.remove("is-pressed");
+}
+
+function handleWaterVisibilityChange() {
+  if (!waterCursorState.root) {
+    return;
+  }
+
+  if (document.hidden) {
+    waterCursorState.visible = false;
+    waterCursorState.root.classList.remove("is-visible");
+  }
+}
+
+function stepWaterCursor() {
+  const state = waterCursorState;
+  const root = state.root;
+
+  if (!state.enabled || !root) {
+    state.frameId = 0;
+    return;
+  }
+
+  const haloEase = state.hovering ? 0.12 : 0.08;
+  const rippleEase = state.hovering ? 0.2 : 0.15;
+  const coreEase = state.hovering ? 0.28 : 0.22;
+
+  state.haloX += (state.targetX - state.haloX) * haloEase;
+  state.haloY += (state.targetY - state.haloY) * haloEase;
+  state.rippleX += (state.targetX - state.rippleX) * rippleEase;
+  state.rippleY += (state.targetY - state.rippleY) * rippleEase;
+  state.coreX += (state.targetX - state.coreX) * coreEase;
+  state.coreY += (state.targetY - state.coreY) * coreEase;
+
+  const dx = state.targetX - state.haloX;
+  const dy = state.targetY - state.haloY;
+  const distance = Math.hypot(dx, dy);
+  const stretch = Math.min(distance / 140, 0.22);
+  const haloScale = state.hovering ? 1.16 : 1;
+  const rippleScale = state.hovering ? 1.08 : 1;
+  const coreScale = state.pressed ? 0.72 : state.hovering ? 1.08 : 1;
+
+  if (state.halo) {
+    state.halo.style.transform = `translate3d(${state.haloX}px, ${state.haloY}px, 0) translate(-50%, -50%) scale(${haloScale + stretch * 0.4})`;
+  }
+
+  if (state.ripple) {
+    state.ripple.style.transform = `translate3d(${state.rippleX}px, ${state.rippleY}px, 0) translate(-50%, -50%) scale(${rippleScale + stretch * 0.2})`;
+  }
+
+  if (state.core) {
+    state.core.style.transform = `translate3d(${state.coreX}px, ${state.coreY}px, 0) translate(-50%, -50%) scale(${coreScale})`;
+  }
+
+  state.frameId = requestAnimationFrame(stepWaterCursor);
+}
+
+function syncWaterCursor() {
+  const shouldEnable = supportsWaterCursor();
+  waterCursorState.enabled = shouldEnable;
+
+  if (!shouldEnable) {
+    removeWaterCursor();
+    return;
+  }
+
+  createWaterCursor();
+  document.body.classList.add("has-water-cursor");
+
+  if (!waterCursorState.initialized) {
+    waterCursorState.initialized = true;
+    window.addEventListener("pointermove", handleWaterPointerMove, { passive: true });
+    window.addEventListener("pointerdown", handleWaterPointerDown, { passive: true });
+    window.addEventListener("pointerup", handleWaterPointerUp, { passive: true });
+    window.addEventListener("pointercancel", handleWaterPointerUp, { passive: true });
+    window.addEventListener("blur", handleWaterPointerUp);
+    document.addEventListener("visibilitychange", handleWaterVisibilityChange);
+  }
 }
 
 const SOCIAL_LINKS = [
@@ -1586,6 +1839,7 @@ function render() {
   syncModalRoot();
   bindEvents();
   setupPageAnimations();
+  syncWaterCursor();
   syncProjectFocus();
 }
 
