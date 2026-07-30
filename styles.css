@@ -2693,6 +2693,16 @@ body.intro-active .page {
   }
 }
 
+body.has-water-cursor,
+body.has-water-cursor *,
+.water-cursor {
+  cursor: auto !important;
+}
+
+.water-cursor {
+  display: none !important;
+}
+
 /* Redesign override */
 :root {
   --background: #070707;
