@@ -1,6 +1,7 @@
 const STORAGE_KEY = "portfolio-language";
 const SUPPORTED_LANGS = new Set(["es", "en"]);
-const INTRO_STORAGE_KEY = "portfolio-intro-seen";
+const APP_VERSION = "2026-07-30-2";
+const INTRO_STORAGE_KEY = `portfolio-intro-seen-${APP_VERSION}`;
 const ACTIVE_SECTION_IDS = ["home", "about", "technologies", "projects", "experience", "contact"];
 
 // Edita este bloque con tu información real cuando quieras personalizar el sitio.
