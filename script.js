@@ -648,6 +648,13 @@ function supportsPortraitSwing() {
   return hasFinePointer() && !prefersReducedMotion();
 }
 
+function getPortraitAutoTarget(timestamp) {
+  const baseAngle = -1.35;
+  const slowDrift = Math.sin(timestamp / 2200) * 1.1;
+  const secondaryDrift = Math.sin(timestamp / 5400 + 1.2) * 0.42;
+  return baseAngle + slowDrift + secondaryDrift;
+}
+
 function stopPortraitSwing() {
   if (portraitSwingState.rafId) {
     cancelAnimationFrame(portraitSwingState.rafId);
@@ -693,25 +700,18 @@ function stepPortraitSwing(timestamp) {
   portraitSwingState.lastFrameTime = timestamp;
 
   if (!portraitSwingState.dragging) {
-    const restAngle = -1.35;
-    portraitSwingState.velocity += (restAngle - portraitSwingState.angle) * 0.04 * delta;
-    portraitSwingState.velocity *= Math.pow(0.88, delta);
+    const targetAngle = getPortraitAutoTarget(timestamp);
+    portraitSwingState.velocity += (targetAngle - portraitSwingState.angle) * 0.045 * delta;
+    portraitSwingState.velocity *= Math.pow(0.915, delta);
     portraitSwingState.angle += portraitSwingState.velocity * delta;
-
-    if (Math.abs(portraitSwingState.angle - restAngle) < 0.015 && Math.abs(portraitSwingState.velocity) < 0.015) {
-      portraitSwingState.angle = restAngle;
-      portraitSwingState.velocity = 0;
-    }
+  } else {
+    portraitSwingState.velocity *= Math.pow(0.9, delta);
   }
 
   portraitSwingState.angle = clampNumber(portraitSwingState.angle, -10.5, 10.5);
   applyPortraitSwing();
 
-  if (portraitSwingState.dragging || Math.abs(portraitSwingState.velocity) > 0.01) {
-    portraitSwingState.rafId = requestAnimationFrame(stepPortraitSwing);
-  } else {
-    portraitSwingState.rafId = 0;
-  }
+  portraitSwingState.rafId = requestAnimationFrame(stepPortraitSwing);
 }
 
 function syncPortraitSwing() {
@@ -732,10 +732,9 @@ function syncPortraitSwing() {
 
   portraitSwingState.dragging = false;
   portraitSwingState.pointerId = null;
-  portraitSwingState.velocity = 0;
   portraitSwingState.lastFrameTime = 0;
-  portraitSwingState.angle = -1.35;
   applyPortraitSwing();
+  ensurePortraitSwingFrame();
 }
 
 function startPortraitDrag(root, pointerId, clientX) {
@@ -840,7 +839,10 @@ function handlePortraitPointerUp(event) {
 function handlePortraitVisibilityChange() {
   if (document.hidden) {
     stopPortraitSwing();
+    return;
   }
+
+  syncPortraitSwing();
 }
 
 function createWaterCursor() {

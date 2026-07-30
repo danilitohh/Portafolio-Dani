@@ -3267,11 +3267,16 @@ body[data-preview-section="contact"] .footer {
   padding-top: 4.25rem;
   transform: translate3d(0, var(--portrait-lift, 0px), 0) rotate(var(--portrait-tilt, -1.35deg));
   transform-origin: center -4.85rem;
+  cursor: grab;
   user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   backface-visibility: hidden;
   will-change: transform;
+}
+
+.portrait.is-dragging {
+  cursor: grabbing;
 }
 
 .portrait__string,
@@ -3358,6 +3363,16 @@ body[data-preview-section="contact"] .footer {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent 18%),
     linear-gradient(180deg, transparent 66%, rgba(0, 0, 0, 0.18));
+}
+
+.portrait__frame::before {
+  content: "";
+  position: absolute;
+  inset: 0.32rem 0.32rem auto;
+  height: 0.55rem;
+  border-radius: 999px 999px 0.35rem 0.35rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0));
+  pointer-events: none;
 }
 
 .portrait__caption {
@@ -4195,6 +4210,11 @@ body[data-preview-section="contact"] .footer {
 
   .portrait {
     width: min(100%, 15.5rem);
+    cursor: default;
+  }
+
+  .portrait.is-dragging {
+    cursor: default;
   }
 
   .portrait__image {
