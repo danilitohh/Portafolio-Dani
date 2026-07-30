@@ -43,8 +43,8 @@ const CONTENT = {
       { label: "Contacto", href: "#contact" },
     ],
     hero: {
-      title: "Construyo bases web con foco en claridad.",
-      summary: "Aporto orden, aprendizaje y una base técnica que sigue creciendo.",
+      title: "Estudiante de software con bases en HTML, CSS y JavaScript.",
+      summary: "Soy estudiante de ADSO en búsqueda de prácticas profesionales, con proyectos funcionales y una base técnica que sigue creciendo.",
       copy:
         "Estoy en formación en SENA y desarrollo proyectos funcionales con HTML, CSS, JavaScript y datos. Me interesa aprender rápido, documentar bien y colaborar con equipos que valoren la claridad.",
       primaryCta: "Ver proyectos",
@@ -258,8 +258,8 @@ const CONTENT = {
       { label: "Contact", href: "#contact" },
     ],
     hero: {
-      title: "I build web foundations with clarity in mind.",
-      summary: "I bring structure, learning, and a technical base that keeps growing.",
+      title: "I build interfaces with HTML, CSS, and JavaScript foundations.",
+      summary: "I am an ADSO student looking for internship opportunities, with functional projects and a technical base that keeps growing.",
       copy:
         "I am studying at SENA and building functional projects with HTML, CSS, JavaScript, and data. I want to learn fast, document well, and collaborate with teams that value clarity.",
       primaryCta: "View projects",
