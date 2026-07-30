@@ -463,6 +463,7 @@ const CONTENT = {
 };
 
 const app = document.querySelector("#app");
+const modalRoot = document.querySelector("#modal-root");
 const storedLang = localStorage.getItem(STORAGE_KEY);
 const browserLang = navigator.language?.toLowerCase().startsWith("es") ? "es" : "en";
 let currentLang = SUPPORTED_LANGS.has(storedLang) ? storedLang : browserLang;
@@ -470,6 +471,14 @@ let activeProjectIndex = null;
 let activeProjectImageIndex = 0;
 let pendingProjectFocusIndex = null;
 let appInteractionsBound = false;
+let pageAnimationContext = null;
+let pageRevealObserver = null;
+let lenisInstance = null;
+let lenisTickerAdded = false;
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+}
 
 const SOCIAL_LINKS = [
   {
@@ -744,7 +753,8 @@ function openProjectModal(index, imageIndex = 0) {
 
   activeProjectIndex = index;
   activeProjectImageIndex = clampProjectImageIndex(project, imageIndex);
-  render();
+  syncModalRoot();
+  syncProjectFocus();
 }
 
 function closeProjectModal() {
@@ -755,7 +765,8 @@ function closeProjectModal() {
   pendingProjectFocusIndex = activeProjectIndex;
   activeProjectIndex = null;
   activeProjectImageIndex = 0;
-  render();
+  syncModalRoot();
+  syncProjectFocus();
 }
 
 function setActiveProjectImage(index) {
@@ -802,7 +813,7 @@ function updateProjectModal() {
   const project = copy.projects.items[activeProjectIndex];
   const detail = project ? getProjectDetail(project) : null;
   const gallery = project ? getProjectGallery(project) : [];
-  const modal = document.querySelector(".project-modal");
+  const modal = modalRoot?.querySelector(".project-modal");
 
   if (!project || !detail || !modal) {
     return;
@@ -838,7 +849,9 @@ function createProjectMedia(project, copy) {
   if (project.image) {
     return `
       <div class="project-card__media">
-        <img class="project-card__image" src="${project.image}" alt="${project.imageAlt}" loading="lazy" />
+        <div class="project-card__media-frame">
+          <img class="project-card__image" src="${project.image}" alt="${project.imageAlt}" loading="lazy" />
+        </div>
       </div>
     `;
   }
@@ -934,7 +947,7 @@ function createProjectModal(copy) {
   return `
     <div class="project-modal" role="presentation" aria-hidden="false">
       <div class="project-modal__backdrop" data-project-close></div>
-      <div class="shell project-modal__panel" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+      <div class="shell project-modal__panel" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
         <button class="project-modal__close" type="button" data-project-close-primary data-project-close aria-label="${copy.projects.modalClose}">×</button>
 
         <div class="project-modal__header">
@@ -1077,6 +1090,258 @@ function syncProjectFocus() {
 
     pendingProjectFocusIndex = null;
   });
+}
+
+function ensureLenis() {
+  if (prefersReducedMotion() || lenisInstance || !window.Lenis || !window.gsap || !window.ScrollTrigger) {
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+  lenisInstance = new Lenis({
+    autoRaf: false,
+    duration: 1.1,
+    smoothWheel: true,
+    smoothTouch: false,
+    anchors: {
+      offset: 96,
+    },
+  });
+
+  lenisInstance.on("scroll", ScrollTrigger.update);
+  if (activeProjectIndex !== null) {
+    lenisInstance.stop?.();
+  }
+
+  if (!lenisTickerAdded) {
+    gsap.ticker.add((time) => {
+      if (lenisInstance) {
+        lenisInstance.raf(time * 1000);
+      }
+    });
+    gsap.ticker.lagSmoothing(0);
+    lenisTickerAdded = true;
+  }
+}
+
+function animateHeroIntro() {
+  if (prefersReducedMotion() || !window.Motion?.animate) {
+    return;
+  }
+
+  const { animate, stagger } = window.Motion;
+
+  animate(
+    ".hero__copy",
+    { opacity: [0, 1], y: [26, 0], filter: ["blur(10px)", "blur(0px)"] },
+    { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__panel",
+    { opacity: [0, 1], x: [26, 0], scale: [0.985, 1] },
+    { duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__role-pill",
+    { opacity: [0, 1], scale: [0.94, 1] },
+    { duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__actions .button",
+    { opacity: [0, 1], y: [14, 0] },
+    { duration: 0.45, delay: stagger(0.08), ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__meta .stat",
+    { opacity: [0, 1], y: [16, 0] },
+    { duration: 0.5, delay: stagger(0.08), ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__panel .panel-card, .hero__panel .panel-item",
+    { opacity: [0, 1], y: [14, 0] },
+    { duration: 0.42, delay: stagger(0.06), ease: [0.22, 1, 0.36, 1] },
+  );
+
+  animate(
+    ".hero__panel .profile-tags .tag",
+    { opacity: [0, 1], y: [10, 0] },
+    { duration: 0.32, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] },
+  );
+}
+
+function animateProjectModal(modal) {
+  if (prefersReducedMotion() || !modal || !window.Motion?.animate) {
+    return;
+  }
+
+  const { animate, stagger } = window.Motion;
+  const panel = modal.querySelector(".project-modal__panel");
+  const frame = modal.querySelector(".project-modal__frame");
+  const sections = modal.querySelectorAll(".project-modal__section, .project-modal__hint");
+  const thumbs = modal.querySelectorAll(".project-modal__thumb");
+
+  if (panel instanceof HTMLElement) {
+    animate(panel, { opacity: [0, 1], y: [22, 0], scale: [0.985, 1] }, { duration: 0.42, ease: [0.22, 1, 0.36, 1] });
+  }
+
+  if (frame instanceof HTMLElement) {
+    animate(frame, { opacity: [0, 1], y: [18, 0], scale: [0.985, 1] }, { duration: 0.45, delay: 0.04, ease: [0.22, 1, 0.36, 1] });
+  }
+
+  if (sections.length) {
+    animate(sections, { opacity: [0, 1], y: [14, 0] }, { duration: 0.35, delay: stagger(0.05), ease: [0.22, 1, 0.36, 1] });
+  }
+
+  if (thumbs.length) {
+    animate(thumbs, { opacity: [0, 1], y: [12, 0] }, { duration: 0.3, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] });
+  }
+}
+
+function syncLenisModalState() {
+  if (!lenisInstance) {
+    return;
+  }
+
+  if (activeProjectIndex !== null) {
+    lenisInstance.stop?.();
+    return;
+  }
+
+  lenisInstance.start?.();
+}
+
+function setupPageAnimations() {
+  if (pageAnimationContext) {
+    pageAnimationContext.revert();
+    pageAnimationContext = null;
+  }
+
+  if (prefersReducedMotion()) {
+    if (pageRevealObserver) {
+      pageRevealObserver.disconnect();
+      pageRevealObserver = null;
+    }
+
+    document.querySelectorAll(".reveal").forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.classList.add("is-visible");
+      }
+    });
+    return;
+  }
+
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    const useMotionHero = !!window.Motion?.animate;
+    pageAnimationContext = gsap.context(() => {
+      gsap.utils.toArray(".reveal").forEach((element) => {
+        if (!(element instanceof HTMLElement)) {
+          return;
+        }
+
+        if (useMotionHero && element.closest(".hero")) {
+          return;
+        }
+
+        const offset = element.classList.contains("reveal--left")
+          ? { x: -28, y: 18, scale: 0.985 }
+          : element.classList.contains("reveal--right")
+            ? { x: 28, y: 18, scale: 0.985 }
+            : element.classList.contains("reveal--zoom")
+              ? { x: 0, y: 18, scale: 0.96 }
+              : { x: 0, y: 22, scale: 0.985 };
+
+        gsap.fromTo(
+          element,
+          { opacity: 0, filter: "blur(6px)", ...offset },
+          {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: element,
+              start: "top 84%",
+              end: "top 58%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        );
+      });
+
+      gsap.fromTo(
+        ".profile-frame",
+        { y: 0 },
+        {
+          y: -20,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: 0.65,
+          },
+        },
+      );
+
+      gsap.utils.toArray(".project-card").forEach((card) => {
+        if (!(card instanceof HTMLElement)) {
+          return;
+        }
+
+        const image = card.querySelector(".project-card__image");
+        if (image instanceof HTMLElement) {
+          gsap.fromTo(
+            image,
+            { y: 14, scale: 1.04 },
+            {
+              y: 0,
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 88%",
+                end: "bottom 18%",
+                scrub: 0.8,
+              },
+            },
+          );
+        }
+      });
+    }, app);
+
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+  } else {
+    observeReveal();
+  }
+
+  animateHeroIntro();
+  ensureLenis();
+}
+
+function syncModalRoot() {
+  if (!modalRoot) {
+    return;
+  }
+
+  const copy = getCopy();
+  modalRoot.innerHTML = activeProjectIndex !== null ? createProjectModal(copy) : "";
+  document.body.classList.toggle("modal-open", activeProjectIndex !== null);
+  syncLenisModalState();
+
+  if (activeProjectIndex !== null) {
+    animateProjectModal(modalRoot.querySelector(".project-modal"));
+  }
 }
 
 function render() {
@@ -1317,19 +1582,18 @@ function render() {
         </div>
       </footer>
     </div>
-    ${createProjectModal(copy)}
   `;
 
-  document.body.classList.toggle("modal-open", activeProjectIndex !== null);
+  syncModalRoot();
   bindEvents();
-  observeReveal();
+  setupPageAnimations();
   syncProjectFocus();
 }
 
 function bindEvents() {
   if (!appInteractionsBound) {
-    app.addEventListener("click", handleProjectInteractions);
-    app.addEventListener("keydown", handleProjectKeydown);
+    document.addEventListener("click", handleProjectInteractions);
+    document.addEventListener("keydown", handleProjectKeydown);
     window.addEventListener("keydown", handleModalKeydown);
     appInteractionsBound = true;
   }
@@ -1476,12 +1740,17 @@ function observeReveal() {
     return;
   }
 
-  const observer = new IntersectionObserver(
+  if (pageRevealObserver) {
+    pageRevealObserver.disconnect();
+    pageRevealObserver = null;
+  }
+
+  pageRevealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
+          pageRevealObserver?.unobserve(entry.target);
         }
       });
     },
@@ -1491,7 +1760,7 @@ function observeReveal() {
     },
   );
 
-  nodes.forEach((node) => observer.observe(node));
+  nodes.forEach((node) => pageRevealObserver?.observe(node));
 }
 
 render();
