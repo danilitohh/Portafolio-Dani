@@ -559,6 +559,16 @@ let waterCursorState = {
   lastRippleAt: 0,
   frameId: 0,
 };
+let portraitSwingState = {
+  root: null,
+  rafId: 0,
+  dragging: false,
+  pointerId: null,
+  angle: -1.35,
+  velocity: 0,
+  lastFrameTime: 0,
+  lastMoveTime: 0,
+};
 
 function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
@@ -571,6 +581,10 @@ function hasFinePointer() {
 function hasConstrainedConnection() {
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   return Boolean(connection?.saveData) || ["slow-2g", "2g"].includes(connection?.effectiveType);
+}
+
+function clampNumber(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function supportsWaterCursor() {
@@ -628,6 +642,205 @@ function syncGlowCard(event) {
 
   activeGlowCard.style.setProperty("--glow-x", `${Math.max(0, Math.min(100, x)).toFixed(2)}%`);
   activeGlowCard.style.setProperty("--glow-y", `${Math.max(0, Math.min(100, y)).toFixed(2)}%`);
+}
+
+function supportsPortraitSwing() {
+  return hasFinePointer() && !prefersReducedMotion();
+}
+
+function stopPortraitSwing() {
+  if (portraitSwingState.rafId) {
+    cancelAnimationFrame(portraitSwingState.rafId);
+    portraitSwingState.rafId = 0;
+  }
+
+  if (portraitSwingState.root instanceof HTMLElement) {
+    portraitSwingState.root.classList.remove("is-dragging");
+  }
+
+  portraitSwingState.dragging = false;
+  portraitSwingState.pointerId = null;
+  portraitSwingState.velocity = 0;
+  portraitSwingState.lastFrameTime = 0;
+}
+
+function applyPortraitSwing() {
+  if (!(portraitSwingState.root instanceof HTMLElement)) {
+    return;
+  }
+
+  portraitSwingState.root.style.setProperty("--portrait-tilt", `${portraitSwingState.angle.toFixed(3)}deg`);
+  portraitSwingState.root.style.setProperty("--portrait-lift", `${Math.abs(portraitSwingState.angle) * 0.06}px`);
+}
+
+function ensurePortraitSwingFrame() {
+  if (!supportsPortraitSwing() || !(portraitSwingState.root instanceof HTMLElement) || portraitSwingState.rafId) {
+    return;
+  }
+
+  portraitSwingState.rafId = requestAnimationFrame(stepPortraitSwing);
+}
+
+function stepPortraitSwing(timestamp) {
+  const root = portraitSwingState.root;
+
+  if (!(root instanceof HTMLElement) || !supportsPortraitSwing()) {
+    stopPortraitSwing();
+    return;
+  }
+
+  const delta = portraitSwingState.lastFrameTime ? Math.min((timestamp - portraitSwingState.lastFrameTime) / 16.6667, 2) : 1;
+  portraitSwingState.lastFrameTime = timestamp;
+
+  if (!portraitSwingState.dragging) {
+    const restAngle = -1.35;
+    portraitSwingState.velocity += (restAngle - portraitSwingState.angle) * 0.04 * delta;
+    portraitSwingState.velocity *= Math.pow(0.88, delta);
+    portraitSwingState.angle += portraitSwingState.velocity * delta;
+
+    if (Math.abs(portraitSwingState.angle - restAngle) < 0.015 && Math.abs(portraitSwingState.velocity) < 0.015) {
+      portraitSwingState.angle = restAngle;
+      portraitSwingState.velocity = 0;
+    }
+  }
+
+  portraitSwingState.angle = clampNumber(portraitSwingState.angle, -10.5, 10.5);
+  applyPortraitSwing();
+
+  if (portraitSwingState.dragging || Math.abs(portraitSwingState.velocity) > 0.01) {
+    portraitSwingState.rafId = requestAnimationFrame(stepPortraitSwing);
+  } else {
+    portraitSwingState.rafId = 0;
+  }
+}
+
+function syncPortraitSwing() {
+  portraitSwingState.root = document.querySelector(".portrait--hero[data-portrait-swing]");
+
+  if (!(portraitSwingState.root instanceof HTMLElement)) {
+    stopPortraitSwing();
+    portraitSwingState.root = null;
+    return;
+  }
+
+  if (!supportsPortraitSwing()) {
+    stopPortraitSwing();
+    portraitSwingState.angle = -1.35;
+    applyPortraitSwing();
+    return;
+  }
+
+  portraitSwingState.dragging = false;
+  portraitSwingState.pointerId = null;
+  portraitSwingState.velocity = 0;
+  portraitSwingState.lastFrameTime = 0;
+  portraitSwingState.angle = -1.35;
+  applyPortraitSwing();
+}
+
+function startPortraitDrag(root, pointerId, clientX) {
+  portraitSwingState.root = root;
+  portraitSwingState.dragging = true;
+  portraitSwingState.pointerId = pointerId;
+  portraitSwingState.lastMoveTime = performance.now();
+  portraitSwingState.velocity = 0;
+
+  const rect = root.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const normalized = clampNumber((clientX - centerX) / Math.max(rect.width / 2, 1), -1, 1);
+  portraitSwingState.angle = clampNumber(normalized * 8.5, -10.5, 10.5);
+  root.classList.add("is-dragging");
+  applyPortraitSwing();
+  ensurePortraitSwingFrame();
+}
+
+function endPortraitDrag() {
+  if (!portraitSwingState.dragging) {
+    return;
+  }
+
+  if (portraitSwingState.root instanceof HTMLElement) {
+    portraitSwingState.root.classList.remove("is-dragging");
+  }
+
+  portraitSwingState.dragging = false;
+  portraitSwingState.pointerId = null;
+  portraitSwingState.lastMoveTime = 0;
+  ensurePortraitSwingFrame();
+}
+
+function handlePortraitPointerDown(event) {
+  if (!supportsPortraitSwing() || event.button !== 0) {
+    return;
+  }
+
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  const root = target.closest("[data-portrait-swing]");
+  if (!(root instanceof HTMLElement)) {
+    return;
+  }
+
+  event.preventDefault();
+  startPortraitDrag(root, event.pointerId, event.clientX);
+
+  try {
+    root.setPointerCapture(event.pointerId);
+  } catch {
+    // Ignore capture failures.
+  }
+}
+
+function handlePortraitPointerMove(event) {
+  if (!portraitSwingState.dragging || event.pointerId !== portraitSwingState.pointerId) {
+    return;
+  }
+
+  const root = portraitSwingState.root;
+  if (!(root instanceof HTMLElement)) {
+    return;
+  }
+
+  const rect = root.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const normalized = clampNumber((event.clientX - centerX) / Math.max(rect.width / 2, 1), -1, 1);
+  const nextAngle = clampNumber(normalized * 8.5, -10.5, 10.5);
+  const now = performance.now();
+  const delta = Math.max(now - portraitSwingState.lastMoveTime, 16);
+
+  portraitSwingState.velocity = ((nextAngle - portraitSwingState.angle) / (delta / 16.6667)) * 0.35;
+  portraitSwingState.angle = nextAngle;
+  portraitSwingState.lastMoveTime = now;
+  applyPortraitSwing();
+  ensurePortraitSwingFrame();
+}
+
+function handlePortraitPointerUp(event) {
+  if (!portraitSwingState.dragging || (event.pointerId != null && event.pointerId !== portraitSwingState.pointerId)) {
+    return;
+  }
+
+  const root = portraitSwingState.root;
+  if (root instanceof HTMLElement) {
+    try {
+      if (portraitSwingState.pointerId !== null && root.hasPointerCapture?.(portraitSwingState.pointerId)) {
+        root.releasePointerCapture(portraitSwingState.pointerId);
+      }
+    } catch {
+      // Ignore release failures.
+    }
+  }
+
+  endPortraitDrag();
+}
+
+function handlePortraitVisibilityChange() {
+  if (document.hidden) {
+    stopPortraitSwing();
+  }
 }
 
 function createWaterCursor() {
@@ -1158,11 +1371,12 @@ const PORTRAIT_IMAGE_FILE = "assets/portrait-danilo.png";
 function createPortraitCard(variant = "hero") {
   const role = PROFILE.role[currentLang];
   const eager = variant === "hero";
+  const swingAttributes = variant === "hero" ? 'data-portrait-swing aria-label="Retrato colgante de Danilo Herrera Hernández. Arrastra para balancearlo."' : `aria-label="${PROFILE.name}"`;
 
   return `
-    <figure class="portrait portrait--${variant}" aria-label="${PROFILE.name}">
-      <span class="portrait__string"></span>
-      <span class="portrait__clip"></span>
+    <figure class="portrait portrait--${variant}" ${swingAttributes}>
+      <span class="portrait__string" aria-hidden="true"></span>
+      <span class="portrait__clip" aria-hidden="true"></span>
       <div class="portrait__frame">
         <div class="portrait__art" style="background-image: url('${PORTRAIT_IMAGE_FILE}');">
           <img
@@ -1176,10 +1390,12 @@ function createPortraitCard(variant = "hero") {
             ${eager ? 'fetchpriority="high"' : ""}
           />
         </div>
-        <figcaption class="portrait__caption">
-          <span>${PROFILE.name}</span>
-          <small>${role}</small>
-        </figcaption>
+        ${variant === "hero" ? "" : `
+          <figcaption class="portrait__caption">
+            <span>${PROFILE.name}</span>
+            <small>${role}</small>
+          </figcaption>
+        `}
       </div>
     </figure>
   `;
@@ -1394,7 +1610,7 @@ function createHeroSection(copy) {
           </div>
         </div>
 
-        <div class="hero__visual">
+      <div class="hero__visual">
           ${createPortraitCard("hero")}
         </div>
       </div>
@@ -2514,6 +2730,7 @@ function render() {
   bindEvents();
   setupPageAnimations();
   syncWaterCursor();
+  syncPortraitSwing();
   syncProjectFocus();
 }
 
@@ -2522,6 +2739,12 @@ function bindEvents() {
     document.addEventListener("click", handleProjectInteractions);
     document.addEventListener("keydown", handleProjectKeydown);
     window.addEventListener("keydown", handleModalKeydown);
+    document.addEventListener("pointerdown", handlePortraitPointerDown);
+    document.addEventListener("pointermove", handlePortraitPointerMove);
+    document.addEventListener("pointerup", handlePortraitPointerUp);
+    document.addEventListener("pointercancel", handlePortraitPointerUp);
+    window.addEventListener("blur", endPortraitDrag);
+    document.addEventListener("visibilitychange", handlePortraitVisibilityChange);
     appInteractionsBound = true;
   }
 
