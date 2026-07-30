@@ -737,7 +737,7 @@ function render() {
               </div>
             </div>
             <p class="section-copy">${copy.projects.copy}</p>
-            <div class="grid-3" style="margin-top: 1.25rem;">
+            <div class="projects-grid" style="margin-top: 1.25rem;">
               ${copy.projects.items.map((project, index) => createProjectCard(project, copy, index)).join("")}
             </div>
           </div>
