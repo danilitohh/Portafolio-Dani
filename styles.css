@@ -18,6 +18,10 @@
   --radius-md: 18px;
   --radius-sm: 14px;
   --shell-width: min(1180px, calc(100vw - 2rem));
+  --ambient-x: 18%;
+  --ambient-y: 12%;
+  --ambient-x-2: 82%;
+  --ambient-y-2: 18%;
 }
 
 *,
@@ -28,7 +32,14 @@
 
 html {
   scroll-behavior: auto;
+  scroll-padding-top: 5.5rem;
   scrollbar-gutter: stable;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -72,11 +83,11 @@ body::after {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 20% 0%, rgba(25, 195, 177, 0.08), transparent 18%),
-    radial-gradient(circle at 100% 0%, rgba(124, 92, 252, 0.08), transparent 22%),
+    radial-gradient(circle at var(--ambient-x) var(--ambient-y), rgba(25, 195, 177, 0.1), transparent 18%),
+    radial-gradient(circle at var(--ambient-x-2) var(--ambient-y-2), rgba(124, 92, 252, 0.08), transparent 22%),
     radial-gradient(circle at 50% 100%, rgba(255, 117, 103, 0.06), transparent 20%);
-  filter: blur(8px);
-  opacity: 0.9;
+  filter: blur(5px);
+  opacity: 0.82;
   z-index: 0;
 }
 
@@ -178,6 +189,33 @@ body.has-water-cursor .textarea {
     0 0 24px rgba(255, 117, 103, 0.18);
 }
 
+.glow-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.glow-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      360px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+      rgba(25, 195, 177, 0.12),
+      rgba(124, 92, 252, 0.06) 32%,
+      transparent 62%
+    );
+  opacity: 0;
+  transition: opacity 160ms ease;
+  mix-blend-mode: screen;
+}
+
+.glow-card.is-glowing::after {
+  opacity: 1;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -208,6 +246,17 @@ button {
 .page {
   width: 100%;
   min-height: 100vh;
+  transition:
+    opacity 260ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 260ms ease;
+}
+
+body.intro-active .page {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+  filter: blur(4px);
+  pointer-events: none;
 }
 
 .shell {
@@ -277,6 +326,12 @@ button {
   letter-spacing: -0.06em;
 }
 
+.page-intro__name {
+  margin: 0.55rem 0 0;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 .page-intro__copy {
   margin: 0.8rem 0 0;
   color: var(--text-secondary);
@@ -302,22 +357,28 @@ button {
 
 .topbar {
   position: sticky;
-  top: 0;
+  top: 0.75rem;
   z-index: 30;
-  background: rgba(11, 18, 32, 0.9);
-  border-bottom: 1px solid rgba(39, 53, 77, 0.86);
+  width: min(var(--shell-width), calc(100vw - 1rem));
+  margin: 0.75rem auto 0;
+  border: 1px solid rgba(39, 53, 77, 0.88);
+  border-radius: 999px;
+  background: rgba(11, 18, 32, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
   transition:
     background 180ms ease,
     border-color 180ms ease,
+    transform 180ms ease,
     box-shadow 180ms ease;
 }
 
 .topbar--floating {
-  background: rgba(11, 18, 32, 0.95);
-  border-bottom-color: rgba(39, 53, 77, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.26);
+  background: rgba(11, 18, 32, 0.88);
+  border-color: rgba(39, 53, 77, 0.78);
+  transform: scale(0.992);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
 
 .topbar__inner {
@@ -325,7 +386,10 @@ button {
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1rem 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.9rem 1rem;
 }
 
 .topbar__actions {
@@ -597,7 +661,7 @@ button {
 
 .profile-frame {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   min-height: 280px;
   border-radius: 28px;
   border: 1px solid rgba(39, 53, 77, 0.95);
@@ -1813,16 +1877,19 @@ button {
 
 .reveal {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(24px) scale(0.985);
+  filter: blur(6px);
   transition:
     opacity 320ms ease,
-    transform 320ms ease;
-  will-change: opacity, transform;
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms ease;
+  will-change: opacity, transform, filter;
 }
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
 
 .topbar {
@@ -1901,12 +1968,38 @@ button {
 }
 
 .hero__panel {
+  position: relative;
   padding: 1.2rem;
 }
 
 .profile-frame {
+  position: relative;
+  overflow: visible;
   min-height: 265px;
   border-radius: 28px;
+  will-change: transform;
+  transform-origin: center -84px;
+  animation: frame-sway 7.5s ease-in-out infinite;
+}
+
+.profile-frame:hover {
+  animation: none;
+  transform: translateY(-2px) rotate(0deg);
+}
+
+.profile-frame::before {
+  content: "";
+  position: absolute;
+  top: -1.2rem;
+  left: 50%;
+  z-index: 2;
+  width: 2px;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(244, 247, 251, 0.85), rgba(25, 195, 177, 0.35));
+  box-shadow: 0 0 16px rgba(25, 195, 177, 0.2);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .profile-frame__name {
@@ -2073,6 +2166,16 @@ button {
   }
 }
 
+@keyframes frame-sway {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.1deg);
+  }
+  50% {
+    transform: translateY(2px) rotate(1.1deg);
+  }
+}
+
 .topbar {
   isolation: isolate;
 }
@@ -2186,19 +2289,6 @@ button {
   opacity: 1;
 }
 
-.profile-frame::before {
-  content: "";
-  position: absolute;
-  inset: -15%;
-  background:
-  radial-gradient(circle at 28% 32%, rgba(25, 195, 177, 0.16), transparent 28%),
-  radial-gradient(circle at 76% 18%, rgba(124, 92, 252, 0.14), transparent 28%),
-  radial-gradient(circle at 62% 74%, rgba(255, 117, 103, 0.08), transparent 22%);
-  filter: blur(14px);
-  opacity: 0.8;
-  pointer-events: none;
-}
-
 .profile-frame::after {
   background-size: 200% 200%;
 }
@@ -2291,12 +2381,14 @@ button {
 
 .reveal {
   opacity: 0;
-  transform: translateY(22px) scale(0.985);
+  transform: translateY(24px) scale(0.985);
+  filter: blur(6px);
   transition:
     opacity 320ms ease,
-    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms ease;
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
 }
 
 .reveal--left {
@@ -2318,6 +2410,7 @@ button {
 .reveal.is-visible {
   opacity: 1;
   transform: translateX(0) translateY(0) scale(1);
+  filter: blur(0);
 }
 
 @media (max-width: 1080px) {
@@ -2402,8 +2495,8 @@ button {
   }
 
   body::after {
-    filter: blur(10px);
-    opacity: 0.58;
+    filter: blur(4px);
+    opacity: 0.48;
   }
 
   .topbar {
@@ -2420,6 +2513,7 @@ button {
 
   .topbar::after,
   .hero__copy::before,
+  .profile-frame,
   .profile-frame::before,
   .profile-frame::after,
   .section-card::after,
@@ -2457,6 +2551,9 @@ button {
 
   .topbar {
     position: static;
+    width: 100%;
+    margin: 0;
+    border-radius: 0 0 24px 24px;
   }
 
   .nav {
@@ -2574,6 +2671,16 @@ button {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reveal,
+  .reveal.is-visible {
+    filter: none !important;
+  }
+
+  .profile-frame,
+  .page-intro__bar span {
+    animation: none !important;
   }
 
   *,

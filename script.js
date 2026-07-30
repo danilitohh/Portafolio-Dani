@@ -503,6 +503,7 @@ let introState = {
   completed: introSeenOnLoad,
   overlay: null,
 };
+let activeGlowCard = null;
 let waterCursorState = {
   initialized: false,
   root: null,
@@ -544,6 +545,59 @@ function supportsWaterCursor() {
   return !prefersReducedMotion() && hasFinePointer() && !hasConstrainedConnection();
 }
 
+function updateAmbientLighting(clientX, clientY) {
+  const width = Math.max(window.innerWidth, 1);
+  const height = Math.max(window.innerHeight, 1);
+  const x = (clientX / width) * 100;
+  const y = (clientY / height) * 100;
+  const x2 = 100 - x * 0.78;
+  const y2 = 100 - y * 0.72;
+
+  document.documentElement.style.setProperty("--ambient-x", `${Math.max(12, Math.min(88, x)).toFixed(2)}%`);
+  document.documentElement.style.setProperty("--ambient-y", `${Math.max(10, Math.min(70, y)).toFixed(2)}%`);
+  document.documentElement.style.setProperty("--ambient-x-2", `${Math.max(14, Math.min(88, x2)).toFixed(2)}%`);
+  document.documentElement.style.setProperty("--ambient-y-2", `${Math.max(12, Math.min(76, y2)).toFixed(2)}%`);
+}
+
+function clearActiveGlowCard() {
+  if (!(activeGlowCard instanceof HTMLElement)) {
+    activeGlowCard = null;
+    return;
+  }
+
+  activeGlowCard.classList.remove("is-glowing");
+  activeGlowCard.style.removeProperty("--glow-x");
+  activeGlowCard.style.removeProperty("--glow-y");
+  activeGlowCard = null;
+}
+
+function syncGlowCard(event) {
+  const target = event.target;
+  const nextCard = target instanceof HTMLElement ? target.closest("[data-glow-card]") : null;
+
+  if (!(nextCard instanceof HTMLElement)) {
+    clearActiveGlowCard();
+    return;
+  }
+
+  if (activeGlowCard !== nextCard) {
+    clearActiveGlowCard();
+    activeGlowCard = nextCard;
+    activeGlowCard.classList.add("is-glowing");
+  }
+
+  const rect = activeGlowCard.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return;
+  }
+
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+  activeGlowCard.style.setProperty("--glow-x", `${Math.max(0, Math.min(100, x)).toFixed(2)}%`);
+  activeGlowCard.style.setProperty("--glow-y", `${Math.max(0, Math.min(100, y)).toFixed(2)}%`);
+}
+
 function createWaterCursor() {
   if (waterCursorState.root) {
     return;
@@ -582,6 +636,11 @@ function removeWaterCursor() {
   }
 
   waterCursorState.root?.remove();
+  clearActiveGlowCard();
+  document.documentElement.style.setProperty("--ambient-x", "18%");
+  document.documentElement.style.setProperty("--ambient-y", "12%");
+  document.documentElement.style.setProperty("--ambient-x-2", "82%");
+  document.documentElement.style.setProperty("--ambient-y-2", "18%");
   waterCursorState = {
     initialized: false,
     root: null,
@@ -611,6 +670,11 @@ function removeWaterCursor() {
 function spawnWaterRipple(x, y, size = 1) {
   if (!waterCursorState.root) {
     return;
+  }
+
+  const activeRipples = waterCursorState.root.querySelectorAll(".water-cursor__wave");
+  if (activeRipples.length >= 5) {
+    activeRipples[0].remove();
   }
 
   const ripple = document.createElement("span");
@@ -653,11 +717,13 @@ function handleWaterPointerMove(event) {
   waterCursorState.targetX = event.clientX;
   waterCursorState.targetY = event.clientY;
   updateWaterCursorClasses(event.target);
+  updateAmbientLighting(event.clientX, event.clientY);
+  syncGlowCard(event);
 
   const moved = Math.hypot(event.clientX - waterCursorState.lastX, event.clientY - waterCursorState.lastY);
   const now = performance.now();
-  if (moved > 12 && now - waterCursorState.lastRippleAt > 70) {
-    const intensity = Math.min(1.35, 0.9 + moved / 140);
+  if (moved > 16 && now - waterCursorState.lastRippleAt > 110) {
+    const intensity = Math.min(1.22, 0.88 + moved / 180);
     spawnWaterRipple(event.clientX, event.clientY, intensity);
     waterCursorState.lastRippleAt = now;
   }
@@ -681,7 +747,7 @@ function handleWaterPointerDown(event) {
 
   waterCursorState.pressed = true;
   waterCursorState.root.classList.add("is-pressed");
-  spawnWaterRipple(event.clientX, event.clientY, 1.7);
+  spawnWaterRipple(event.clientX, event.clientY, 1.5);
 
   if (!waterCursorState.frameId) {
     waterCursorState.frameId = requestAnimationFrame(stepWaterCursor);
@@ -705,6 +771,7 @@ function handleWaterVisibilityChange() {
   if (document.hidden) {
     waterCursorState.visible = false;
     waterCursorState.root.classList.remove("is-visible");
+    clearActiveGlowCard();
   }
 }
 
@@ -1022,22 +1089,24 @@ function createTag(tag) {
   return `<span class="tag">${tag}</span>`;
 }
 
-function createIntroOverlay(copy) {
+function createIntroOverlay() {
   if (introState.completed || prefersReducedMotion()) {
     return "";
   }
 
-  const introTitle = currentLang === "es" ? "Preparando tu portafolio" : "Preparing your portfolio";
+  const introGreeting = currentLang === "es" ? "Hola" : "Hello";
+  const introTitle = currentLang === "es" ? "Bienvenido a mi portafolio" : "Welcome to my portfolio";
   const introCopy =
     currentLang === "es"
-      ? "Carga ligera, navegación bilingüe y foco en desarrollo."
-      : "Lightweight loading, bilingual navigation, and a focus on development.";
+      ? "Diseño, desarrollo y sistemas en un solo lugar."
+      : "Design, development, and systems in one place.";
 
   return `
     <div class="page-intro" data-page-intro role="status" aria-live="polite" aria-label="${introTitle}">
       <div class="page-intro__panel">
-        <p class="page-intro__kicker">${copy.hero.profileTitle}</p>
-        <h2 class="page-intro__title">${PROFILE.name}</h2>
+        <p class="page-intro__kicker">${introGreeting}</p>
+        <h2 class="page-intro__title">${introTitle}</h2>
+        <p class="page-intro__name">${PROFILE.name}</p>
         <p class="page-intro__copy">${introCopy}</p>
         <div class="page-intro__bar" aria-hidden="true"><span></span></div>
       </div>
@@ -1220,7 +1289,7 @@ function setupIntroOverlay() {
 
   introTimerId = window.setTimeout(() => {
     dismissIntroOverlay();
-  }, 1150);
+  }, 1450);
 }
 
 function revealAboveFold() {
@@ -1413,7 +1482,7 @@ function createProjectActions(project, copy) {
 
 function createProjectCard(project, copy, index = 0) {
   return `
-    <article class="project-card reveal reveal--up" style="--reveal-delay: ${24 + index * 24}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
+    <article class="project-card glow-card reveal reveal--up" data-glow-card style="--reveal-delay: ${24 + index * 24}ms" data-project-open="${index}" tabindex="0" role="button" aria-label="${copy.projects.detailCta}: ${project.title}">
       ${createProjectMedia(project, copy)}
       <div class="project-card__body">
         <div class="project-card__head">
@@ -1543,7 +1612,7 @@ function createProjectModal(copy) {
 
 function createSkillCard(group, index = 0) {
   return `
-    <article class="skill-card reveal reveal--up" style="--reveal-delay: ${20 + index * 22}ms">
+    <article class="skill-card glow-card reveal reveal--up" data-glow-card style="--reveal-delay: ${20 + index * 22}ms">
       <div class="skill-card__head">
         <span class="skill-card__icon">${group.icon}</span>
         <div>
@@ -1562,7 +1631,7 @@ function createSkillCard(group, index = 0) {
 function createTimelineCard(item, index = 0) {
   const directionClass = index % 2 === 0 ? "reveal--left" : "reveal--right";
   return `
-    <article class="timeline-card reveal ${directionClass}" style="--reveal-delay: ${18 + index * 22}ms">
+    <article class="timeline-card glow-card reveal ${directionClass}" data-glow-card style="--reveal-delay: ${18 + index * 22}ms">
       <div class="timeline-year">${item.year}</div>
       <div>
         <h3 class="timeline-title">${item.title}</h3>
@@ -1672,6 +1741,8 @@ function render() {
     introState.pending = false;
   }
 
+  document.body.classList.toggle("intro-active", shouldShowIntro || introState.active);
+
   document.documentElement.lang = currentLang;
   document.title = copy.pageTitle;
 
@@ -1681,7 +1752,7 @@ function render() {
   }
 
   app.innerHTML = `
-    ${shouldShowIntro ? createIntroOverlay(copy) : ""}
+    ${shouldShowIntro ? createIntroOverlay() : ""}
     <div class="page">
       <header class="topbar">
         <div class="shell topbar__inner">
@@ -1700,7 +1771,7 @@ function render() {
       <main>
         <section class="hero" id="home">
           <div class="shell hero__grid">
-            <article class="hero__copy reveal reveal--left" style="--reveal-delay: 12ms">
+            <article class="hero__copy glow-card reveal reveal--left" data-glow-card style="--reveal-delay: 12ms">
               <h1 class="hero__headline">${copy.hero.title}</h1>
               <div class="hero__role-pill">${PROFILE.role[currentLang]}</div>
               <p class="hero__lede">${copy.hero.summary}</p>
@@ -1725,7 +1796,7 @@ function render() {
               </div>
             </article>
 
-            <aside class="hero__panel reveal reveal--right" style="--reveal-delay: 18ms" aria-label="${copy.hero.profileTitle}">
+            <aside class="hero__panel glow-card reveal reveal--right" data-glow-card style="--reveal-delay: 18ms" aria-label="${copy.hero.profileTitle}">
               <div class="profile-frame">
                 <div class="profile-frame__content">
                   <span class="profile-frame__badge">${copy.hero.profileTitle}</span>
@@ -1750,7 +1821,7 @@ function render() {
         </section>
 
         <section class="section" id="about">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
+          <div class="shell section-card glow-card reveal reveal--zoom" data-glow-card style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.about.kicker}</p>
@@ -1765,7 +1836,7 @@ function render() {
                   ${copy.about.highlights
                     .map(
                       (item, index) => `
-                        <article class="about-spotlight reveal reveal--up" style="--reveal-delay: ${18 + index * 20}ms">
+                        <article class="about-spotlight glow-card reveal reveal--up" data-glow-card style="--reveal-delay: ${18 + index * 20}ms">
                           <h3 class="about-spotlight__title">${item.title}</h3>
                           <p class="about-spotlight__text">${item.text}</p>
                         </article>
@@ -1778,7 +1849,7 @@ function render() {
                 ${copy.about.pillars
                   .map(
                     (item) => `
-                      <article class="mini-card">
+                      <article class="mini-card glow-card" data-glow-card>
                         <h3 class="mini-card__title">${item.title}</h3>
                         <p class="mini-card__text">${item.text}</p>
                       </article>
@@ -1791,7 +1862,7 @@ function render() {
         </section>
 
         <section class="section" id="projects">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
+          <div class="shell section-card glow-card reveal reveal--zoom" data-glow-card style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.projects.kicker}</p>
@@ -1806,7 +1877,7 @@ function render() {
         </section>
 
         <section class="section" id="technologies">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
+          <div class="shell section-card glow-card reveal reveal--zoom" data-glow-card style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.skills.kicker}</p>
@@ -1821,7 +1892,7 @@ function render() {
         </section>
 
         <section class="section" id="experience">
-          <div class="shell section-card reveal reveal--zoom" style="--reveal-delay: 12ms">
+          <div class="shell section-card glow-card reveal reveal--zoom" data-glow-card style="--reveal-delay: 12ms">
             <div class="section-head">
               <div>
                 <p class="section-kicker">${copy.journey.kicker}</p>
@@ -1837,7 +1908,7 @@ function render() {
 
         <section class="section" id="contact">
           <div class="shell contact-grid">
-            <article class="contact-card reveal reveal--left" style="--reveal-delay: 12ms">
+    <article class="contact-card glow-card reveal reveal--left" data-glow-card style="--reveal-delay: 12ms">
               <p class="section-kicker">${copy.contact.kicker}</p>
               <h2 class="section-title">${copy.contact.title}</h2>
               <p class="section-copy">${copy.contact.copy}</p>
@@ -1863,7 +1934,7 @@ function render() {
               </div>
             </article>
 
-            <article class="contact-card reveal reveal--right" style="--reveal-delay: 20ms">
+    <article class="contact-card glow-card reveal reveal--right" data-glow-card style="--reveal-delay: 20ms">
               <p class="section-kicker">${copy.contact.formTitle}</p>
               <h2 class="section-title">${copy.contact.formTitle}</h2>
               <form class="contact-form" id="contact-form">
