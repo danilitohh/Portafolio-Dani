@@ -832,26 +832,8 @@ function stepWaterCursor() {
 }
 
 function syncWaterCursor() {
-  const shouldEnable = supportsWaterCursor();
-  waterCursorState.enabled = shouldEnable;
-
-  if (!shouldEnable) {
-    removeWaterCursor();
-    return;
-  }
-
-  createWaterCursor();
-  document.body.classList.add("has-water-cursor");
-
-  if (!waterCursorState.initialized) {
-    waterCursorState.initialized = true;
-    window.addEventListener("pointermove", handleWaterPointerMove, { passive: true });
-    window.addEventListener("pointerdown", handleWaterPointerDown, { passive: true });
-    window.addEventListener("pointerup", handleWaterPointerUp, { passive: true });
-    window.addEventListener("pointercancel", handleWaterPointerUp, { passive: true });
-    window.addEventListener("blur", handleWaterPointerUp);
-    document.addEventListener("visibilitychange", handleWaterVisibilityChange);
-  }
+  // Keep the native system cursor only.
+  removeWaterCursor();
 }
 
 const SOCIAL_LINKS = [
