@@ -503,8 +503,20 @@ function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 }
 
+function hasFinePointer() {
+  return window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches ?? false;
+}
+
+function isCompactViewport() {
+  return window.matchMedia?.("(max-width: 980px)")?.matches ?? false;
+}
+
+function shouldUseEnhancedMotion() {
+  return !prefersReducedMotion() && hasFinePointer() && !isCompactViewport();
+}
+
 function supportsWaterCursor() {
-  return !prefersReducedMotion() && window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches;
+  return !prefersReducedMotion() && hasFinePointer();
 }
 
 function createWaterCursor() {
@@ -1103,7 +1115,7 @@ function createProjectMedia(project, copy) {
     return `
       <div class="project-card__media">
         <div class="project-card__media-frame">
-          <img class="project-card__image" src="${project.image}" alt="${project.imageAlt}" loading="lazy" />
+          <img class="project-card__image" src="${project.image}" alt="${project.imageAlt}" loading="lazy" decoding="async" />
         </div>
       </div>
     `;
@@ -1175,7 +1187,7 @@ function createProjectThumb(image, index, isActive) {
       aria-label="${alt}"
       aria-current="${isActive ? "true" : "false"}"
     >
-      <img class="project-modal__thumb-image" src="${image.src}" alt="${alt}" loading="lazy" />
+      <img class="project-modal__thumb-image" src="${image.src}" alt="${alt}" loading="lazy" decoding="async" />
     </button>
   `;
 }
@@ -1217,7 +1229,7 @@ function createProjectModal(copy) {
         <div class="project-modal__layout">
           <div class="project-modal__gallery">
             <div class="project-modal__frame">
-              ${activeImage ? `<img class="project-modal__image" data-project-modal-image src="${activeImage.src}" alt="${activeImageAlt}" loading="eager" />` : ""}
+              ${activeImage ? `<img class="project-modal__image" data-project-modal-image src="${activeImage.src}" alt="${activeImageAlt}" loading="eager" decoding="async" />` : ""}
               <div class="project-modal__frame-topline">
                 <span>${copy.projects.modalGallery}</span>
                 <span data-project-modal-count>${imageCountLabel}</span>
@@ -1346,7 +1358,7 @@ function syncProjectFocus() {
 }
 
 function ensureLenis() {
-  if (prefersReducedMotion() || lenisInstance || !window.Lenis || !window.gsap || !window.ScrollTrigger) {
+  if (!shouldUseEnhancedMotion() || lenisInstance || !window.Lenis || !window.gsap || !window.ScrollTrigger) {
     return;
   }
 
@@ -1378,7 +1390,7 @@ function ensureLenis() {
 }
 
 function animateHeroIntro() {
-  if (prefersReducedMotion() || !window.Motion?.animate) {
+  if (!shouldUseEnhancedMotion() || !window.Motion?.animate) {
     return;
   }
 
@@ -1428,7 +1440,7 @@ function animateHeroIntro() {
 }
 
 function animateProjectModal(modal) {
-  if (prefersReducedMotion() || !modal || !window.Motion?.animate) {
+  if (!shouldUseEnhancedMotion() || !modal || !window.Motion?.animate) {
     return;
   }
 
@@ -1475,6 +1487,11 @@ function setupPageAnimations() {
   }
 
   if (prefersReducedMotion()) {
+    if (lenisInstance) {
+      lenisInstance.stop?.();
+      lenisInstance = null;
+    }
+
     if (pageRevealObserver) {
       pageRevealObserver.disconnect();
       pageRevealObserver = null;
@@ -1485,6 +1502,21 @@ function setupPageAnimations() {
         element.classList.add("is-visible");
       }
     });
+    return;
+  }
+
+  if (!shouldUseEnhancedMotion()) {
+    if (lenisInstance) {
+      lenisInstance.stop?.();
+      lenisInstance = null;
+    }
+
+    document.querySelectorAll(".hero .reveal").forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.classList.add("is-visible");
+      }
+    });
+    observeReveal();
     return;
   }
 
@@ -1577,8 +1609,8 @@ function setupPageAnimations() {
     observeReveal();
   }
 
-  animateHeroIntro();
   ensureLenis();
+  animateHeroIntro();
 }
 
 function syncModalRoot() {
