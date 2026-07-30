@@ -1022,7 +1022,7 @@ function setActiveProjectImage(index) {
   }
 
   activeProjectImageIndex = clampProjectImageIndex(project, index);
-  render();
+  updateProjectModal();
 }
 
 function stepProjectImage(direction) {
@@ -1043,6 +1043,47 @@ function stepProjectImage(direction) {
 
   const nextIndex = (activeProjectImageIndex + direction + gallery.length) % gallery.length;
   setActiveProjectImage(nextIndex);
+}
+
+function updateProjectModal() {
+  if (activeProjectIndex === null) {
+    return;
+  }
+
+  const copy = getCopy();
+  const project = copy.projects.items[activeProjectIndex];
+  const detail = project ? getProjectDetail(project) : null;
+  const gallery = project ? getProjectGallery(project) : [];
+  const modal = document.querySelector(".project-modal");
+
+  if (!project || !detail || !modal) {
+    return;
+  }
+
+  const activeImage = gallery[activeProjectImageIndex] || gallery[0];
+  const imageAlt = activeImage?.alt?.[currentLang] || project.imageAlt;
+  const image = modal.querySelector("[data-project-modal-image]");
+  const count = modal.querySelector("[data-project-modal-count]");
+
+  if (image instanceof HTMLImageElement && activeImage) {
+    image.src = activeImage.src;
+    image.alt = imageAlt;
+  }
+
+  if (count) {
+    count.textContent = gallery.length ? `${activeProjectImageIndex + 1}/${gallery.length}` : "1/1";
+  }
+
+  modal.querySelectorAll("[data-project-thumb]").forEach((button) => {
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+
+    const thumbIndex = Number(button.dataset.projectThumb);
+    const isActive = Number.isInteger(thumbIndex) && thumbIndex === activeProjectImageIndex;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "true" : "false");
+  });
 }
 
 function createProjectMedia(project, copy) {
@@ -1162,10 +1203,10 @@ function createProjectModal(copy) {
         <div class="project-modal__layout">
           <div class="project-modal__gallery">
             <div class="project-modal__frame">
-              ${activeImage ? `<img class="project-modal__image" src="${activeImage.src}" alt="${activeImageAlt}" loading="eager" />` : ""}
+              ${activeImage ? `<img class="project-modal__image" data-project-modal-image src="${activeImage.src}" alt="${activeImageAlt}" loading="eager" />` : ""}
               <div class="project-modal__frame-topline">
                 <span>${copy.projects.modalGallery}</span>
-                <span>${imageCountLabel}</span>
+                <span data-project-modal-count>${imageCountLabel}</span>
               </div>
               ${gallery.length > 1 ? `
                 <div class="project-modal__nav">
