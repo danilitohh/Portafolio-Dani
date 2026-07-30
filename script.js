@@ -72,6 +72,20 @@ const CONTENT = {
       title: "Estudio, construyo y aprendo con contexto real.",
       copy:
         "Soy estudiante de Tecnología en Análisis y Desarrollo de Software (ADSO) en SENA. Me interesa transformar necesidades reales en interfaces y soluciones sencillas, con bases en programación, bases de datos y desarrollo de aplicaciones.",
+      highlights: [
+        {
+          title: "Aprendizaje activo",
+          text: "Fortalezco HTML, CSS, JavaScript y bases de datos con proyectos funcionales.",
+        },
+        {
+          title: "Comunicación clara",
+          text: "Me gusta traducir necesidades en interfaces simples y trabajar con contexto real.",
+        },
+        {
+          title: "Orden y seguimiento",
+          text: "La documentación y el seguimiento me ayudan a avanzar con claridad.",
+        },
+      ],
       pillars: [
         {
           title: "Base técnica",
@@ -257,6 +271,20 @@ const CONTENT = {
       title: "I study, build, and learn in real contexts.",
       copy:
         "I am a student in SENA's Technology in Software Analysis and Development (ADSO) program. I focus on turning real needs into simple interfaces and solutions, with foundations in programming, databases, and application development.",
+      highlights: [
+        {
+          title: "Active learning",
+          text: "I keep strengthening HTML, CSS, JavaScript, and databases through functional projects.",
+        },
+        {
+          title: "Clear communication",
+          text: "I like turning needs into simple interfaces and working with real context.",
+        },
+        {
+          title: "Order and follow-up",
+          text: "Documentation and tracking help me move forward with clarity.",
+        },
+      ],
       pillars: [
         {
           title: "Technical foundation",
@@ -644,9 +672,21 @@ function render() {
               </div>
             </div>
 
-            <div class="section-grid">
+            <div class="section-grid section-grid--about">
               <div class="about__lead">
                 <p class="section-copy">${copy.about.copy}</p>
+                <div class="about__highlights">
+                  ${copy.about.highlights
+                    .map(
+                      (item, index) => `
+                        <article class="about-spotlight reveal reveal--up" style="--reveal-delay: ${100 + index * 85}ms">
+                          <h3 class="about-spotlight__title">${item.title}</h3>
+                          <p class="about-spotlight__text">${item.text}</p>
+                        </article>
+                      `,
+                    )
+                    .join("")}
+                </div>
               </div>
               <div class="about__list">
                 ${copy.about.pillars

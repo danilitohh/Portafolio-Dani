@@ -596,18 +596,62 @@ button {
   gap: 1rem;
 }
 
+.section-grid--about {
+  align-items: start;
+}
+
 .about__lead {
-  grid-column: span 7;
+  grid-column: span 6;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
 .about__list {
-  grid-column: span 5;
+  grid-column: span 6;
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.about__highlights {
   display: grid;
   gap: 0.85rem;
 }
 
+.about-spotlight {
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(39, 53, 77, 0.95);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.about-spotlight:hover {
+  transform: translateY(-2px);
+  border-color: rgba(25, 195, 177, 0.28);
+  background: rgba(25, 195, 177, 0.06);
+}
+
+.about-spotlight__title {
+  margin: 0;
+  font-family: "Sora", sans-serif;
+  font-size: 0.98rem;
+  letter-spacing: -0.03em;
+}
+
+.about-spotlight__text {
+  margin: 0.32rem 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.94rem;
+}
+
 .mini-card {
-  padding: 1rem 1rem 1.05rem;
+  padding: 0.95rem 1rem;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(39, 53, 77, 0.95);
