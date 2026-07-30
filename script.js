@@ -63,7 +63,6 @@ const CONTENT = {
     },
     snapshot: [
       { label: "Rol", value: PROFILE.role.es },
-      { label: "Ubicación", value: PROFILE.location.es },
       { label: "Idiomas", value: PROFILE.languages.es },
       { label: "Enfoque", value: PROFILE.focus.es },
       { label: "Disponibilidad", value: PROFILE.availability.es },
@@ -249,7 +248,6 @@ const CONTENT = {
     },
     snapshot: [
       { label: "Role", value: PROFILE.role.en },
-      { label: "Location", value: PROFILE.location.en },
       { label: "Languages", value: PROFILE.languages.en },
       { label: "Focus", value: PROFILE.focus.en },
       { label: "Availability", value: PROFILE.availability.en },
