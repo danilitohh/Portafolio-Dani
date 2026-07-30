@@ -123,7 +123,7 @@ const CONTENT = {
           type: "Tienda online",
           slug: "ambrosia-bhang",
           title: "Tienda online - Ambrosia Bhang",
-          image: "assets/projects/ambrosia-bhang/cover.png",
+          image: "assets/projects/ambrosia-bhang/gallery/03.png",
           imageAlt: "Vista previa de la tienda online Ambrosia Bhang",
           liveUrl: "https://ambrosia-eosin.vercel.app",
           repoUrl: "https://github.com/danilitohh/ambrosia-tienda-virtual",
@@ -137,7 +137,7 @@ const CONTENT = {
           type: "Sistema veterinario",
           slug: "lativet",
           title: "Sistema veterinario - Lativet",
-          image: "assets/projects/lativet/cover.png",
+          image: "assets/projects/lativet/gallery/02.png",
           imageAlt: "Vista previa del sistema veterinario Lativet",
           liveUrl: "https://lativet.vercel.app",
           repoUrl: "https://github.com/danilitohh/Lativet",
@@ -151,7 +151,7 @@ const CONTENT = {
           type: "Seguimiento por Gmail",
           slug: "hessa-enterprises",
           title: "Sistema de seguimiento por Gmail - Hessa Enterprises",
-          image: "assets/projects/hessa-enterprises/cover.png",
+          image: "assets/projects/hessa-enterprises/gallery/01.png",
           imageAlt: "Vista previa del sistema de seguimiento por Gmail Hessa Enterprises",
           liveUrl: "https://hessaenterprises.vercel.app",
           repoUrl: "https://github.com/danilitohh/Hessaenterprises",
@@ -348,7 +348,7 @@ const CONTENT = {
           type: "Online store",
           slug: "ambrosia-bhang",
           title: "Online store - Ambrosia Bhang",
-          image: "assets/projects/ambrosia-bhang/cover.png",
+          image: "assets/projects/ambrosia-bhang/gallery/03.png",
           imageAlt: "Preview of the Ambrosia Bhang online store",
           liveUrl: "https://ambrosia-eosin.vercel.app",
           repoUrl: "https://github.com/danilitohh/ambrosia-tienda-virtual",
@@ -362,7 +362,7 @@ const CONTENT = {
           type: "Veterinary system",
           slug: "lativet",
           title: "Veterinary system - Lativet",
-          image: "assets/projects/lativet/cover.png",
+          image: "assets/projects/lativet/gallery/02.png",
           imageAlt: "Preview of the Lativet veterinary system",
           liveUrl: "https://lativet.vercel.app",
           repoUrl: "https://github.com/danilitohh/Lativet",
@@ -376,7 +376,7 @@ const CONTENT = {
           type: "Gmail follow-up system",
           slug: "hessa-enterprises",
           title: "Gmail follow-up system - Hessa Enterprises",
-          image: "assets/projects/hessa-enterprises/cover.png",
+          image: "assets/projects/hessa-enterprises/gallery/01.png",
           imageAlt: "Preview of the Hessa Enterprises Gmail follow-up system",
           liveUrl: "https://hessaenterprises.vercel.app",
           repoUrl: "https://github.com/danilitohh/Hessaenterprises",
@@ -511,99 +511,14 @@ const SOCIAL_LINKS = [
 
 const PROJECT_DETAILS = {
   "ambrosia-bhang": {
-    gallery: [
+    gallery: buildSequentialGallery(
+      "assets/projects/ambrosia-bhang/gallery",
+      18,
       {
-        src: "assets/projects/ambrosia-bhang/cover.png",
-        alt: {
-          es: "Portada principal de la tienda online Ambrosia Bhang",
-          en: "Main cover for the Ambrosia Bhang online store",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/brand-logo.jpeg",
-        alt: {
-          es: "Logo de marca de Ambrosia Bhang",
-          en: "Ambrosia Bhang brand logo",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/banner-1.jpeg",
-        alt: {
-          es: "Banner promocional de Ambrosia Bhang",
-          en: "Ambrosia Bhang promotional banner",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/banner-2.jpeg",
-        alt: {
-          es: "Vista visual de fondo de Ambrosia Bhang",
-          en: "Ambrosia Bhang background visual",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/banner-3.jpeg",
-        alt: {
-          es: "Segunda vista visual de fondo de Ambrosia Bhang",
-          en: "Second background visual for Ambrosia Bhang",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-1.jpeg",
-        alt: {
-          es: "Producto 1 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 1",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-2.jpeg",
-        alt: {
-          es: "Producto 2 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 2",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-3.jpeg",
-        alt: {
-          es: "Producto 3 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 3",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-4.jpeg",
-        alt: {
-          es: "Producto 4 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 4",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-5.jpeg",
-        alt: {
-          es: "Producto 5 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 5",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-6.jpeg",
-        alt: {
-          es: "Producto 6 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 6",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-7.jpeg",
-        alt: {
-          es: "Producto 7 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 7",
-        },
-      },
-      {
-        src: "assets/projects/ambrosia-bhang/product-8.jpeg",
-        alt: {
-          es: "Producto 8 de Ambrosia Bhang",
-          en: "Ambrosia Bhang product 8",
-        },
-      },
-    ],
+        es: "Captura de Ambrosia Bhang",
+        en: "Ambrosia Bhang screenshot",
+      }
+    ),
     es: {
       overview:
         "Tienda online enfocada en catálogo, presentación de productos y un flujo de compra claro. También contempla una base administrativa para promociones, autenticación y cobros.",
@@ -638,92 +553,10 @@ const PROJECT_DETAILS = {
     },
   },
   lativet: {
-    gallery: [
-      {
-        src: "assets/projects/lativet/cover.png",
-        alt: {
-          es: "Portada principal del sistema veterinario Lativet",
-          en: "Main cover for the Lativet veterinary system",
-        },
-      },
-      {
-        src: "assets/projects/lativet/agenda-del-dia.png",
-        alt: {
-          es: "Agenda del día en Lativet",
-          en: "Daily agenda in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/pacientes-e-historias.png",
-        alt: {
-          es: "Pacientes e historias clínicas en Lativet",
-          en: "Patients and medical histories in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/consentimientos.png",
-        alt: {
-          es: "Consentimientos en Lativet",
-          en: "Consent forms in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/crear-cotizacion.png",
-        alt: {
-          es: "Creación de cotización en Lativet",
-          en: "Quote creation in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/crear-factura.png",
-        alt: {
-          es: "Creación de factura en Lativet",
-          en: "Invoice creation in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/revisar-inventario.png",
-        alt: {
-          es: "Revisión de inventario en Lativet",
-          en: "Inventory review in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/usuarios-y-permisos.png",
-        alt: {
-          es: "Usuarios y permisos en Lativet",
-          en: "Users and permissions in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/ver-reportes.png",
-        alt: {
-          es: "Reportes en Lativet",
-          en: "Reports in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/registrar-abono.png",
-        alt: {
-          es: "Registro de abonos en Lativet",
-          en: "Payment registration in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/registrar-ingreso-o-gasto.png",
-        alt: {
-          es: "Registro de ingreso o gasto en Lativet",
-          en: "Income or expense registration in Lativet",
-        },
-      },
-      {
-        src: "assets/projects/lativet/peluqueria.png",
-        alt: {
-          es: "Módulo de peluquería en Lativet",
-          en: "Grooming module in Lativet",
-        },
-      },
-    ],
+    gallery: buildSequentialGallery("assets/projects/lativet/gallery", 32, {
+      es: "Captura de Lativet",
+      en: "Lativet screenshot",
+    }),
     es: {
       overview:
         "Sistema veterinario para centralizar agenda, historiales, consentimientos, inventario, facturación y reportes en un flujo operativo claro.",
@@ -758,78 +591,10 @@ const PROJECT_DETAILS = {
     },
   },
   "hessa-enterprises": {
-    gallery: [
-      {
-        src: "assets/projects/hessa-enterprises/cover.png",
-        alt: {
-          es: "Portada principal de Hessa Enterprises",
-          en: "Main cover for Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/hero.png",
-        alt: {
-          es: "Hero visual de Hessa Enterprises",
-          en: "Hessa Enterprises hero visual",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/logo.png",
-        alt: {
-          es: "Logo principal de Hessa Enterprises",
-          en: "Hessa Enterprises main logo",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/logo-wordmark.png",
-        alt: {
-          es: "Marca tipográfica de Hessa Enterprises",
-          en: "Hessa Enterprises wordmark",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/appointment-management.png",
-        alt: {
-          es: "Gestión de citas en Hessa Enterprises",
-          en: "Appointment management in Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/browser-access.png",
-        alt: {
-          es: "Acceso desde navegador en Hessa Enterprises",
-          en: "Browser access in Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/client-history.png",
-        alt: {
-          es: "Historial de clientes en Hessa Enterprises",
-          en: "Client history in Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/email-follow-up.png",
-        alt: {
-          es: "Seguimiento por correo en Hessa Enterprises",
-          en: "Email follow-up in Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/per-user-workspace.png",
-        alt: {
-          es: "Espacio por usuario en Hessa Enterprises",
-          en: "Per-user workspace in Hessa Enterprises",
-        },
-      },
-      {
-        src: "assets/projects/hessa-enterprises/proposal-pipeline.png",
-        alt: {
-          es: "Pipeline de propuestas en Hessa Enterprises",
-          en: "Proposal pipeline in Hessa Enterprises",
-        },
-      },
-    ],
+    gallery: buildSequentialGallery("assets/projects/hessa-enterprises/gallery", 10, {
+      es: "Captura de Hessa Enterprises",
+      en: "Hessa Enterprises screenshot",
+    }),
     es: {
       overview:
         "Workspace de seguimiento comercial que centraliza clientes, correos, plantillas, tareas y próximos contactos para no perder ninguna oportunidad.",
@@ -967,6 +732,19 @@ function createNavItem(item) {
 
 function createTag(tag) {
   return `<span class="tag">${tag}</span>`;
+}
+
+function buildSequentialGallery(basePath, count, label) {
+  return Array.from({ length: count }, (_, index) => {
+    const imageNumber = String(index + 1).padStart(2, "0");
+    return {
+      src: `${basePath}/${imageNumber}.png`,
+      alt: {
+        es: `${label.es} ${index + 1}`,
+        en: `${label.en} ${index + 1}`,
+      },
+    };
+  });
 }
 
 function getProjectDetail(project) {
