@@ -1135,6 +1135,24 @@ function createMetricCard(label, value, detail, index = 0) {
   `;
 }
 
+function createAboutSnapshotCard(item, index = 0) {
+  return `
+    <article class="about-snapshot-card reveal reveal--up" style="--reveal-delay: ${14 + index * 12}ms">
+      <span class="about-snapshot-card__label">${item.label}</span>
+      <strong class="about-snapshot-card__value">${item.value}</strong>
+    </article>
+  `;
+}
+
+function createAboutHighlightCard(item, index = 0) {
+  return `
+    <article class="about-spotlight reveal reveal--up" style="--reveal-delay: ${24 + index * 14}ms">
+      <h3 class="about-spotlight__title">${item.title}</h3>
+      <p class="about-spotlight__text">${item.text}</p>
+    </article>
+  `;
+}
+
 function createPortraitCard(variant = "hero") {
   const initials = getProfileInitials();
   const role = PROFILE.role[currentLang];
@@ -1301,9 +1319,20 @@ function createAboutSection(copy) {
           </div>
         </div>
 
-        <div class="about__portrait">
-          ${createPortraitCard("about")}
-        </div>
+        <aside class="about__panel reveal reveal--right" style="--reveal-delay: 18ms">
+          <div class="about__panel-head">
+            <p class="about__panel-kicker">${currentLang === "es" ? "Perfil" : "Profile"}</p>
+            <h3 class="about__panel-title">${currentLang === "es" ? "Lo que aporto en práctica" : "What I bring in practice"}</h3>
+          </div>
+
+          <div class="about__snapshot">
+            ${copy.snapshot.map((item, index) => createAboutSnapshotCard(item, index)).join("")}
+          </div>
+
+          <div class="about__highlights">
+            ${copy.about.highlights.map((item, index) => createAboutHighlightCard(item, index)).join("")}
+          </div>
+        </aside>
       </div>
 
       <div class="shell metrics-grid">
