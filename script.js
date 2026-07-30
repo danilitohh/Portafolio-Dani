@@ -1133,7 +1133,7 @@ function animateHeroIntro() {
 
   animate(
     ".hero__copy",
-    { opacity: [0, 1], y: [26, 0], filter: ["blur(10px)", "blur(0px)"] },
+    { opacity: [0, 1], y: [26, 0] },
     { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
   );
 
@@ -1258,13 +1258,12 @@ function setupPageAnimations() {
 
         gsap.fromTo(
           element,
-          { opacity: 0, filter: "blur(6px)", ...offset },
+          { opacity: 0, ...offset },
           {
             opacity: 1,
             x: 0,
             y: 0,
             scale: 1,
-            filter: "blur(0px)",
             duration: 0.85,
             ease: "power3.out",
             scrollTrigger: {
