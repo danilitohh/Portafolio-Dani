@@ -19,7 +19,7 @@ Base de portafolio en JavaScript puro, pensada para mostrar:
 
 1. Edita el bloque `PROFILE` en `script.js`.
 2. Reemplaza los textos de `CONTENT.es` y `CONTENT.en`.
-3. Cambia los enlaces de GitHub, LinkedIn y correo.
+3. Cambia los enlaces de GitHub, correo y teléfono si lo necesitas.
 4. En cada proyecto, rellena `image` con una ruta local como `assets/projects/proyecto-01.jpg`, `liveUrl` con el enlace al proyecto y `repoUrl` con el enlace real de GitHub.
 5. Ajusta las categorías de la sección de `Tecnologías` en `CONTENT.es/en` según tu stack real.
 6. Ajusta colores, tarjetas y secciones en `styles.css`.

@@ -3,61 +3,63 @@ const SUPPORTED_LANGS = new Set(["es", "en"]);
 
 // Edita este bloque con tu información real cuando quieras personalizar el sitio.
 const PROFILE = {
-  name: "Tu Nombre",
+  name: "Danilo Herrera Hernández",
   role: {
-    es: "Desarrollador/a de software bilingüe",
-    en: "Bilingual Software Developer",
+    es: "Estudiante de ADSO en búsqueda de prácticas profesionales",
+    en: "ADSO student seeking professional internships",
   },
-  email: "tu-correo@ejemplo.com",
-  github: "https://github.com/tu-usuario",
-  linkedin: "https://www.linkedin.com/in/tu-usuario/",
+  email: "danilitohhh@gmail.com",
+  phone: "+57 300 909 7514",
+  github: "https://github.com/danilitohh",
   location: {
-    es: "Bogotá, Colombia",
-    en: "Bogotá, Colombia",
+    es: "Colombia",
+    en: "Colombia",
   },
   availability: {
-    es: "Disponible para proyectos freelance, empleo remoto o colaboraciones creativas.",
-    en: "Available for freelance work, remote roles, and creative collaborations.",
+    es: "Disponible para prácticas profesionales desde junio de 2026.",
+    en: "Available for professional internships since June 2026.",
   },
   focus: {
-    es: "Interfaces, productos digitales y experiencias web flexibles.",
-    en: "Interfaces, digital products, and flexible web experiences.",
+    es: "HTML, CSS, JavaScript, bases de datos y aprendizaje continuo.",
+    en: "HTML, CSS, JavaScript, databases, and continuous learning.",
   },
   languages: {
-    es: "Español e inglés",
-    en: "Spanish and English",
+    es: "Español nativo e inglés profesional de trabajo",
+    en: "Native Spanish and professional working English",
   },
 };
 
+const GITHUB_REPOS_URL = "https://github.com/danilitohh?tab=repositories";
+
 const CONTENT = {
   es: {
-    pageTitle: "Portafolio | Tu Nombre",
+    pageTitle: "Portafolio | Danilo Herrera Hernández",
     pageDescription:
-      "Portafolio bilingüe de desarrollador de software con estética tecnológica, profesional y humana.",
+      "Portafolio bilingüe de Danilo Herrera Hernández, estudiante de ADSO en búsqueda de prácticas profesionales.",
     nav: [
       { label: "Inicio", href: "#home" },
       { label: "Sobre mí", href: "#about" },
       { label: "Tecnologías", href: "#technologies" },
       { label: "Proyectos", href: "#projects" },
-      { label: "Experiencia", href: "#experience" },
+      { label: "Formación", href: "#experience" },
       { label: "Contacto", href: "#contact" },
     ],
     hero: {
-      eyebrow: "Portafolio bilingüe",
-      title: "Construyo soluciones digitales claras, útiles y cercanas.",
+      eyebrow: "Estudiante de ADSO",
+      title: "Busco prácticas profesionales mientras sigo fortaleciendo mi base técnica.",
       copy:
-        "Combino diseño de interfaces, criterio técnico y comunicación cercana para convertir ideas complejas en productos web confiables y fáciles de usar.",
+        "Estoy en formación en SENA y construyo proyectos funcionales mientras aprendo a transformar requisitos en soluciones claras. Mi foco actual es HTML, CSS, JavaScript y bases de datos.",
       primaryCta: "Ver proyectos",
-      secondaryCta: "Escribirme",
+      secondaryCta: "Contactarme",
       stats: [
-        { value: "ES / EN", label: "Navegación bilingüe" },
-        { value: "UI + CODE", label: "Diseño y desarrollo" },
-        { value: "100%", label: "Contenido editable" },
+        { value: "ADSO", label: "SENA | Tecnología en curso" },
+        { value: "HTML/CSS/JS", label: "Bases web" },
+        { value: "PRÁCTICAS", label: "Disponible" },
       ],
-      profileTitle: "Perfil editable",
+      profileTitle: "Perfil de practicante",
       profileCaption:
-        "Reemplaza este bloque con tu nombre, una foto si quieres, y una descripción breve que resuma tu propuesta de valor.",
-      tags: ["Responsivo", "Accesible", "Colaborativo"],
+        "Soy estudiante de ADSO y busco una oportunidad de práctica profesional. Aprendo construyendo y documentando mi trabajo con orden.",
+      tags: ["Bilingüe", "Prácticas", "Proyectos funcionales"],
     },
     snapshot: [
       { label: "Rol", value: PROFILE.role.es },
@@ -68,146 +70,158 @@ const CONTENT = {
     ],
     about: {
       kicker: "Sobre mí",
-      title: "Tecnología con criterio humano.",
+      title: "Estudio, construyo y aprendo con contexto real.",
       copy:
-        "Aquí puedes contar cómo conectas la parte técnica con la comprensión real de una necesidad. Es el lugar para explicar cómo piensas, cómo priorizas y cómo trabajas con otras personas.",
+        "Soy estudiante de Tecnología en Análisis y Desarrollo de Software (ADSO) en SENA. Me interesa transformar necesidades reales en interfaces y soluciones sencillas, con bases en programación, bases de datos y desarrollo de aplicaciones.",
       pillars: [
         {
-          title: "Solidez técnica",
-          text: "Construyo interfaces y soluciones mantenibles, con atención al detalle y estructura clara.",
+          title: "Base técnica",
+          text: "Manejo fundamentos de HTML, CSS y JavaScript, además de nociones de Java, SQL, Python, Flutter (Dart) y Angular.",
         },
         {
-          title: "Comprensión de necesidades",
-          text: "Escucho, traduzco objetivos y convierto ideas abiertas en decisiones concretas.",
+          title: "Pensamiento práctico",
+          text: "Me apoyo en el orden, la documentación y la coordinación para resolver problemas con criterio.",
         },
         {
           title: "Trabajo con personas",
-          text: "Comunico avances con claridad, colaboro bien y cuido la experiencia de quien usará el producto.",
+          text: "La experiencia en operaciones, documentación y reclutamiento fortaleció mi comunicación y seguimiento.",
         },
       ],
     },
     projects: {
       kicker: "Proyectos",
-      title: "Proyectos que muestran proceso, criterio y resultado.",
+      title: "Proyectos funcionales que muestran lo que he construido.",
       copy:
-        "Cada tarjeta admite imagen, tecnologías, enlace al proyecto y repositorio para que presentes tu trabajo con claridad visual y técnica.",
+        "Cada tarjeta admite una imagen local, un enlace al proyecto y un enlace al repositorio en GitHub para que puedas completar esta sección con tus URLs finales.",
       liveCta: "Ver proyecto",
       repoCta: "Ver repositorio",
-      imageFallbackTitle: "Agrega una imagen",
-      imageFallbackText: "Usa una ruta local como assets/projects/proyecto-01.jpg o un SVG/PNG.",
+      imageFallbackTitle: "Agrega una captura",
+      imageFallbackText: "Usa una ruta local como assets/projects/proyecto-01.jpg.",
       items: [
         {
           index: "01",
-          type: "Proyecto destacado",
-          title: "Nombre del proyecto",
+          type: "Proyecto personal",
+          title: "App de facturación e inventario veterinario",
           image: "",
-          imageAlt: "Vista previa del proyecto destacado",
-          liveUrl: "https://tu-proyecto-01.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-01",
+          imageAlt: "Vista previa de la app de facturación e inventario veterinario",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Describe el problema, tu rol, el proceso y el resultado. Puedes añadir una frase sobre el impacto o el objetivo principal.",
-          tags: ["JavaScript", "UI", "Responsive"],
-          footer: "Añade enlaces a demo y repositorio",
+            "Desarrollé módulos para cotizaciones, facturas, inventario, reportes, movimientos de caja, usuarios, historia clínica y citas, con CRUD, validaciones, integraciones y reglas de negocio.",
+          tags: ["JavaScript", "CRUD", "Bases de datos", "Validaciones"],
+          footer: "Proyecto personal en funcionamiento",
         },
         {
           index: "02",
-          type: "Landing / Producto",
-          title: "Nombre del producto",
+          type: "Proyecto personal",
+          title: "AsistenteVirtual",
           image: "",
-          imageAlt: "Vista previa del producto",
-          liveUrl: "https://tu-proyecto-02.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-02",
+          imageAlt: "Vista previa de AsistenteVirtual",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Usa esta tarjeta para proyectos de marketing, dashboards, apps internas, sitios corporativos o cualquier idea visual que quieras destacar.",
-          tags: ["Motion", "Sistema visual", "Accesibilidad"],
-          footer: "Añade enlace al caso o demo",
+            "Encargado de generar propuestas, estimados, calendarios y seguimientos de proyectos, además de apoyar la comunicación con clientes y la documentación operativa.",
+          tags: ["JavaScript", "Productividad", "Documentación", "Seguimiento"],
+          footer: "Proyecto personal en desarrollo",
         },
         {
           index: "03",
-          type: "Experimento / Idea",
-          title: "Nombre del experimento",
+          type: "Proyecto académico / personal",
+          title: "App de Fitness",
           image: "",
-          imageAlt: "Vista previa del experimento",
-          liveUrl: "https://tu-proyecto-03.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-03",
+          imageAlt: "Vista previa de la app de fitness",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Perfecta para demostrar iteración, pruebas visuales o proyectos personales que muestran tu forma de explorar y aprender.",
-          tags: ["Animación", "API", "Creative coding"],
-          footer: "Añade enlace a código o demo",
+            "Diseñé y documenté una app de fitness con usuarios, rutinas, ejercicios, repeticiones y seguimiento de progreso.",
+          tags: ["HTML", "CSS", "JavaScript", "Diseño de interfaz"],
+          footer: "Proyecto académico / personal",
         },
       ],
     },
     skills: {
       kicker: "Tecnologías",
-      title: "Organiza tu stack para que se entienda rápido.",
+      title: "Mi base técnica mientras sigo aprendiendo.",
       copy:
-        "Agrupar tecnologías por contexto ayuda a leer tu nivel técnico sin perderse. Reemplaza estas categorías por tu stack real y mantén la estructura limpia.",
+        "Estas son las tecnologías y herramientas que manejo hoy, con bases especialmente en HTML, CSS y JavaScript.",
       groups: [
         {
-          icon: "FE",
-          title: "Front-end",
-          summary: "Construcción visual y arquitectura de interfaz.",
-          items: ["HTML semántico", "CSS moderno", "JavaScript", "React", "Responsive design"],
+          icon: "WEB",
+          title: "Fundamentos web",
+          summary: "Bases que uso para construir interfaces sencillas y responsivas.",
+          items: ["HTML", "CSS", "JavaScript", "Responsive design", "Accesibilidad"],
         },
         {
-          icon: "API",
-          title: "Backend & APIs",
-          summary: "Lógica, integración y comunicación entre servicios.",
-          items: ["Node.js", "REST APIs", "Autenticación", "Integraciones", "Bases de datos"],
+          icon: "DATA",
+          title: "Bases de datos",
+          summary: "Manejo de datos y modelado básico para aplicaciones.",
+          items: ["SQL", "MySQL", "MongoDB", "Supabase básico", "Modelado relacional"],
         },
         {
-          icon: "DX",
-          title: "Workflow",
-          summary: "Herramientas que mantienen el trabajo ordenado y colaborativo.",
-          items: ["Git y GitHub", "Figma", "Testing", "Deploy", "Documentación"],
+          icon: "TOOL",
+          title: "Lenguajes y frameworks",
+          summary: "Tecnologías que sigo reforzando mientras amplío mi perfil.",
+          items: ["Java", "Python", "Flutter (Dart)", "Angular", "GitHub", "VS Code"],
+        },
+        {
+          icon: "OPS",
+          title: "Herramientas de trabajo",
+          summary: "Herramientas que me ayudan a mantener orden y seguimiento.",
+          items: ["Android Studio", "XAMPP", "Trello", "Slack", "Google Workspace"],
         },
       ],
     },
     journey: {
-      kicker: "Experiencia",
-      title: "Experiencia y formación que respaldan mi forma de trabajar.",
+      kicker: "Formación y experiencia",
+      title: "Experiencia laboral y formación que fortalecen mi perfil.",
       copy:
-        "Puedes usar esta línea de tiempo para mostrar empleo, estudios, certificaciones o hitos personales. También sirve para contar cómo has crecido como profesional.",
+        "Mi recorrido combina estudios en ADSO con experiencia previa en coordinación, documentación y reclutamiento, habilidades que ayudan a trabajar con orden y comunicación.",
       items: [
         {
-          year: "2026",
-          title: "Momento actual",
-          text: "Agrega tu rol actual, lo que estás construyendo o el foco principal de este año.",
+          year: "2025 - actualidad",
+          title: "Tecnología en Análisis y Desarrollo de Software (ADSO) - SENA",
+          text: "Formación actual centrada en desarrollo de software, programación y construcción de aplicaciones.",
         },
         {
-          year: "2025",
-          title: "Paso anterior",
-          text: "Resume un trabajo, proyecto o aprendizaje importante que haya marcado tu crecimiento.",
+          year: "2017",
+          title: "Técnica en Sistemas - SENA",
+          text: "Base técnica inicial en sistemas y soporte a la infraestructura de trabajo.",
         },
         {
-          year: "2024",
-          title: "Base técnica",
-          text: "Incluye estudios, certificaciones o un proyecto que te haya ayudado a consolidar habilidades.",
+          year: "Ago 2024 - May 2025",
+          title: "Coordinador Logístico - Leangroup Solutions",
+          text: "Generación de propuestas, estimados, calendarios y seguimiento de proyectos, además de apoyo en comunicación con clientes y documentación operativa.",
+        },
+        {
+          year: "2020 - 2024",
+          title: "Reclutador - HP Service Americas BPS / Manpower Group / UPS",
+          text: "Monitoreo de sistemas, reportes, registros digitales, seguimiento y búsqueda de candidatos para ofertas.",
         },
       ],
     },
     contact: {
       kicker: "Contacto",
-      title: "Hablemos de tu siguiente idea.",
+      title: "Hablemos de tu siguiente oportunidad o proyecto.",
       copy:
-        "Aquí puedes dejar tu correo, GitHub, LinkedIn o cualquier canal que uses. El formulario abre tu cliente de correo sin necesidad de backend.",
+        "Si buscas a alguien en formación, con ganas de aprender y una base real en proyectos funcionales, aquí tienes mis canales directos.",
       emailLabel: "Correo",
+      phoneLabel: "Teléfono",
       actionLabel: "Abrir",
       locationLabel: "Ubicación",
-      formTitle: "Mensaje rápido",
+      formTitle: "Mensaje directo",
       formName: "Nombre",
       formEmail: "Correo",
-      formMessage: "Cuéntame sobre tu idea, proyecto o colaboración",
+      formMessage: "Cuéntame sobre la vacante, proyecto o colaboración",
       submit: "Abrir correo",
       clear: "Limpiar",
       status: "El formulario abrirá tu cliente de correo con el mensaje preparado.",
     },
-    footer: "Diseñado para mostrar trabajo real con una identidad cercana y sólida.",
+    footer: "Estudiante de ADSO, creando proyectos funcionales y buscando prácticas profesionales.",
   },
   en: {
-    pageTitle: "Portfolio | Your Name",
+    pageTitle: "Portfolio | Danilo Herrera Hernández",
     pageDescription:
-      "Bilingual software developer portfolio with a technological, professional, modern, and human feel.",
+      "Bilingual portfolio of Danilo Herrera Hernández, an ADSO student looking for internship opportunities.",
     nav: [
       { label: "Home", href: "#home" },
       { label: "About", href: "#about" },
@@ -217,21 +231,21 @@ const CONTENT = {
       { label: "Contact", href: "#contact" },
     ],
     hero: {
-      eyebrow: "Bilingual portfolio",
-      title: "I build digital solutions that are clear, useful, and human.",
+      eyebrow: "ADSO student",
+      title: "I am looking for internship opportunities while strengthening my technical foundation.",
       copy:
-        "I combine interface design, technical judgment, and close communication to turn complex ideas into reliable web products that are easy to use.",
+        "I am studying at SENA and building working projects while learning how to turn requirements into clear solutions. My current focus is HTML, CSS, JavaScript, and databases.",
       primaryCta: "View projects",
-      secondaryCta: "Email me",
+      secondaryCta: "Contact me",
       stats: [
-        { value: "ES / EN", label: "Bilingual navigation" },
-        { value: "UI + CODE", label: "Design and development" },
-        { value: "100%", label: "Editable content" },
+        { value: "ADSO", label: "SENA | In progress" },
+        { value: "HTML/CSS/JS", label: "Web basics" },
+        { value: "INTERNSHIPS", label: "Available" },
       ],
-      profileTitle: "Editable profile",
+      profileTitle: "Internship profile",
       profileCaption:
-        "Replace this block with your name, a photo if you want one, and a short description that sums up your value.",
-      tags: ["Responsive", "Accessible", "Collaborative"],
+        "I am an ADSO student looking for a professional internship. I learn by building and documenting my work carefully.",
+      tags: ["Bilingual", "Internships", "Functional projects"],
     },
     snapshot: [
       { label: "Role", value: PROFILE.role.en },
@@ -241,142 +255,154 @@ const CONTENT = {
       { label: "Availability", value: PROFILE.availability.en },
     ],
     about: {
-      kicker: "About",
-      title: "Technology with human judgment.",
+      kicker: "About me",
+      title: "I study, build, and learn in real contexts.",
       copy:
-        "Use this section to explain how you connect the technical side with the real needs behind a project. It is the place to show how you think, prioritize, and work with others.",
+        "I am a student in SENA's Technology in Software Analysis and Development (ADSO) program. I focus on turning real needs into simple interfaces and solutions, with foundations in programming, databases, and application development.",
       pillars: [
         {
-          title: "Technical depth",
-          text: "I build maintainable interfaces and solutions with structure, clarity, and attention to detail.",
+          title: "Technical foundation",
+          text: "I work with HTML, CSS, and JavaScript, plus basic knowledge of Java, SQL, Python, Flutter (Dart), and Angular.",
         },
         {
-          title: "Understanding needs",
-          text: "I listen, translate goals, and turn open-ended ideas into concrete decisions.",
+          title: "Practical thinking",
+          text: "I rely on order, documentation, and coordination to solve problems with judgment.",
         },
         {
           title: "Working with people",
-          text: "I communicate progress clearly, collaborate well, and care about the experience of the person using the product.",
+          text: "Experience in operations, documentation, and recruiting strengthened my communication and follow-up.",
         },
       ],
     },
     projects: {
       kicker: "Projects",
-      title: "Projects that show process, judgment, and outcome.",
+      title: "Functional projects that show what I have built.",
       copy:
-        "Each card supports an image, technologies, a live project link, and a repository link so you can present your work clearly and visually.",
+        "Each card supports a local image, a live project link, and a GitHub repository link so you can complete this section with your final URLs.",
       liveCta: "View project",
       repoCta: "View repository",
       imageFallbackTitle: "Add an image",
-      imageFallbackText: "Use a local path like assets/projects/project-01.jpg or an SVG/PNG.",
+      imageFallbackText: "Use a local path like assets/projects/project-01.jpg.",
       items: [
         {
           index: "01",
-          type: "Featured project",
-          title: "Project name",
+          type: "Personal project",
+          title: "Veterinary billing and inventory app",
           image: "",
-          imageAlt: "Featured project preview",
-          liveUrl: "https://tu-proyecto-01.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-01",
+          imageAlt: "Preview of the veterinary billing and inventory app",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Describe the problem, your role, the process, and the result. Add a short sentence about impact or the main goal.",
-          tags: ["JavaScript", "UI", "Responsive"],
-          footer: "Add a live demo and repository link",
+            "I built modules for quotes, invoices, inventory, reports, cash movements, users, medical history, and appointments, with CRUD flows, validations, integrations, and business rules.",
+          tags: ["JavaScript", "CRUD", "Databases", "Validation"],
+          footer: "Personal project in working use",
         },
         {
           index: "02",
-          type: "Landing / Product",
-          title: "Product name",
+          type: "Personal project",
+          title: "AsistenteVirtual",
           image: "",
-          imageAlt: "Product preview",
-          liveUrl: "https://tu-proyecto-02.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-02",
+          imageAlt: "Preview of AsistenteVirtual",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Use this card for marketing sites, dashboards, internal tools, corporate pages, or any visual idea you want to highlight.",
-          tags: ["Motion", "Visual system", "Accessibility"],
-          footer: "Add a case-study or demo link",
+            "I generated proposals, estimates, calendars, and project follow-ups, while also supporting client communication and operational documentation.",
+          tags: ["JavaScript", "Productivity", "Documentation", "Tracking"],
+          footer: "Personal project in progress",
         },
         {
           index: "03",
-          type: "Experiment / Idea",
-          title: "Experiment name",
+          type: "Academic / personal project",
+          title: "Fitness App",
           image: "",
-          imageAlt: "Experiment preview",
-          liveUrl: "https://tu-proyecto-03.com",
-          repoUrl: "https://github.com/tu-usuario/proyecto-03",
+          imageAlt: "Preview of the fitness app",
+          liveUrl: "",
+          repoUrl: GITHUB_REPOS_URL,
           summary:
-            "Perfect for showing iteration, visual tests, or personal projects that reveal how you explore and learn.",
-          tags: ["Animation", "API", "Creative coding"],
-          footer: "Add code or demo link",
+            "I designed and documented a fitness app with users, routines, exercises, reps, and progress tracking.",
+          tags: ["HTML", "CSS", "JavaScript", "UI design"],
+          footer: "Academic / personal project",
         },
       ],
     },
     skills: {
       kicker: "Technologies",
-      title: "Organize your stack so it is readable at a glance.",
+      title: "My current technical base while I keep learning.",
       copy:
-        "Grouping technologies by context helps people understand your technical level without getting lost. Replace these categories with your real stack and keep the structure tidy.",
+        "These are the technologies and tools I use today, with my strongest foundation in HTML, CSS, and JavaScript.",
       groups: [
         {
-          icon: "FE",
-          title: "Front-end",
-          summary: "Visual construction and interface architecture.",
-          items: ["Semantic HTML", "Modern CSS", "JavaScript", "React", "Responsive design"],
+          icon: "WEB",
+          title: "Web fundamentals",
+          summary: "Building blocks for simple, responsive interfaces.",
+          items: ["HTML", "CSS", "JavaScript", "Responsive design", "Accessibility"],
         },
         {
-          icon: "API",
-          title: "Backend & APIs",
-          summary: "Logic, integration, and service communication.",
-          items: ["Node.js", "REST APIs", "Authentication", "Integrations", "Databases"],
+          icon: "DATA",
+          title: "Databases",
+          summary: "Data handling and basic modeling for applications.",
+          items: ["SQL", "MySQL", "MongoDB", "Basic Supabase", "Relational modeling"],
         },
         {
-          icon: "DX",
-          title: "Workflow",
-          summary: "Tools that keep the work tidy and collaborative.",
-          items: ["Git and GitHub", "Figma", "Testing", "Deploy", "Documentation"],
+          icon: "TOOL",
+          title: "Languages and frameworks",
+          summary: "Technologies I am strengthening as I expand my profile.",
+          items: ["Java", "Python", "Flutter (Dart)", "Angular", "GitHub", "VS Code"],
+        },
+        {
+          icon: "OPS",
+          title: "Work tools",
+          summary: "Tools that help me stay organized and keep track of work.",
+          items: ["Android Studio", "XAMPP", "Trello", "Slack", "Google Workspace"],
         },
       ],
     },
     journey: {
-      kicker: "Experience",
-      title: "Experience and education that back up how I work.",
+      kicker: "Education and experience",
+      title: "Work experience and education that strengthen my profile.",
       copy:
-        "You can use this timeline to show employment, studies, certifications, or personal milestones. It also works well to explain how you have grown as a professional.",
+        "My path combines ADSO studies with prior experience in coordination, documentation, and recruiting, skills that support clear communication and organized work.",
       items: [
         {
-          year: "2026",
-          title: "Current moment",
-          text: "Add your current role, what you're building, or the main focus for this year.",
+          year: "2025 - present",
+          title: "Technology in Software Analysis and Development (ADSO) - SENA",
+          text: "Current training focused on software development, programming, databases, and application building.",
         },
         {
-          year: "2025",
-          title: "Previous step",
-          text: "Summarize a job, project, or learning experience that shaped your growth.",
+          year: "2017",
+          title: "Systems Technician - SENA",
+          text: "Initial technical foundation in systems and workplace support.",
         },
         {
-          year: "2024",
-          title: "Technical base",
-          text: "Include studies, certifications, or a project that helped solidify your skills.",
+          year: "Aug 2024 - May 2025",
+          title: "Logistics Coordinator - Leangroup Solutions",
+          text: "Prepared proposals, estimates, schedules, and project follow-up, while supporting client communication and operational documentation.",
+        },
+        {
+          year: "2020 - 2024",
+          title: "Recruiter - HP Service Americas BPS / Manpower Group / UPS",
+          text: "Monitored systems, generated reports, maintained digital records, followed up on processes, and sourced candidates for openings.",
         },
       ],
     },
     contact: {
       kicker: "Contact",
-      title: "Let's talk about your next idea.",
+      title: "Let's talk about your next opportunity or project.",
       copy:
-        "Leave your email, GitHub, LinkedIn, or any channel you use. The form opens your mail client without needing a backend.",
+        "If you are looking for someone who is still learning, eager to grow, and already has a real base of functional projects, here are my direct channels.",
       emailLabel: "Email",
+      phoneLabel: "Phone",
       actionLabel: "Open",
       locationLabel: "Location",
-      formTitle: "Quick message",
+      formTitle: "Direct message",
       formName: "Name",
       formEmail: "Email",
-      formMessage: "Tell me about your idea, project, or collaboration",
+      formMessage: "Tell me about the opening, project, or collaboration",
       submit: "Open email",
       clear: "Clear",
-      status: "The form will open your mail client with the message prefilled.",
+      status: "The form will open your email client with the message prepared.",
     },
-    footer: "Built to show real work with a solid, approachable identity.",
+    footer: "ADSO student building functional projects and looking for internship opportunities.",
   },
 };
 
@@ -387,19 +413,19 @@ let currentLang = SUPPORTED_LANGS.has(storedLang) ? storedLang : browserLang;
 
 const SOCIAL_LINKS = [
   {
-    label: "GitHub",
+    label: { es: "GitHub", en: "GitHub" },
     href: PROFILE.github,
     description: { es: "Repositorio y código", en: "Repository and code" },
   },
   {
-    label: "LinkedIn",
-    href: PROFILE.linkedin,
-    description: { es: "Experiencia profesional", en: "Professional experience" },
-  },
-  {
-    label: "Email",
+    label: { es: "Correo", en: "Email" },
     href: `mailto:${PROFILE.email}`,
     description: { es: "Escríbeme directo", en: "Write to me directly" },
+  },
+  {
+    label: { es: "Teléfono", en: "Phone" },
+    href: `tel:${PROFILE.phone.replace(/\s+/g, "")}`,
+    description: { es: "Llamada directa", en: "Direct call" },
   },
 ];
 
@@ -523,7 +549,7 @@ function createSocialItem(link, copy) {
   return `
     <a class="contact-item" href="${link.href}"${external ? ' target="_blank" rel="noreferrer"' : ""}>
       <div>
-        <div class="contact-item__label">${link.label}</div>
+        <div class="contact-item__label">${link.label[currentLang]}</div>
         <div class="contact-item__value">${link.description[currentLang]}</div>
       </div>
       <span class="button button--ghost" aria-hidden="true">${copy.contact.actionLabel}</span>
@@ -754,8 +780,8 @@ function render() {
           <p>${copy.footer}</p>
           <div class="footer__links">
             <a href="${PROFILE.github}" target="_blank" rel="noreferrer">GitHub</a>
-            <a href="${PROFILE.linkedin}" target="_blank" rel="noreferrer">LinkedIn</a>
             <a href="mailto:${PROFILE.email}">${PROFILE.email}</a>
+            <a href="tel:${PROFILE.phone.replace(/\s+/g, "")}">${PROFILE.phone}</a>
           </div>
         </div>
       </footer>
