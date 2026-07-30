@@ -1153,17 +1153,28 @@ function createAboutHighlightCard(item, index = 0) {
   `;
 }
 
+const PORTRAIT_IMAGE_FILE = "assets/portrait-danilo.png";
+
 function createPortraitCard(variant = "hero") {
-  const initials = getProfileInitials();
   const role = PROFILE.role[currentLang];
+  const eager = variant === "hero";
 
   return `
     <figure class="portrait portrait--${variant}" aria-label="${PROFILE.name}">
       <span class="portrait__string"></span>
       <span class="portrait__clip"></span>
       <div class="portrait__frame">
-        <div class="portrait__art" aria-hidden="true">
-          <span class="portrait__initials">${initials}</span>
+        <div class="portrait__art" style="background-image: url('${PORTRAIT_IMAGE_FILE}');">
+          <img
+            class="portrait__image"
+            src="${PORTRAIT_IMAGE_FILE}"
+            alt="Retrato de Danilo Herrera Hernández"
+            width="1138"
+            height="1540"
+            loading="${eager ? "eager" : "lazy"}"
+            decoding="async"
+            ${eager ? 'fetchpriority="high"' : ""}
+          />
         </div>
         <figcaption class="portrait__caption">
           <span>${PROFILE.name}</span>
@@ -1383,7 +1394,7 @@ function createHeroSection(copy) {
           </div>
         </div>
 
-        <div class="hero__visual reveal reveal--right" style="--reveal-delay: 18ms">
+        <div class="hero__visual">
           ${createPortraitCard("hero")}
         </div>
       </div>
