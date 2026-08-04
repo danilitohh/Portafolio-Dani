@@ -239,7 +239,7 @@
       null,
       h(
         "group",
-        { position: [0, 4.15, 0] },
+        { position: [0, 4.25, 0] },
         h(RigidBody, { ref: fixed, ...segmentProps, type: "fixed" }),
         h(
           RigidBody,
@@ -263,7 +263,7 @@
           h(
             "group",
             {
-              scale: 2.25,
+              scale: 2.85,
               position: [0, -1.2, -0.05],
               onPointerOver: () => hover(true),
               onPointerOut: () => hover(false),
@@ -313,15 +313,15 @@
     }, []);
 
     return h(Lanyard, {
-      position: [0, 0, 22],
+      position: [0, 0, 17.5],
       gravity: [0, -40, 0],
-      fov: 20,
-      transparent: true,
+      fov: 18,
+      transparent: false,
       frontImage: portraitImage,
       backImage: portraitImage,
       imageFit: "cover",
       lanyardImage: defaultLanyardTexture,
-      lanyardWidth: 1.08,
+      lanyardWidth: 1.15,
     });
   }
 
