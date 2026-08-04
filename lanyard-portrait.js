@@ -64,18 +64,18 @@
         h(
           Suspense,
           { fallback: null },
-          h(
-            Physics,
-            { gravity, timeStep: isMobile ? 1 / 30 : 1 / 60 },
-            h(Band, {
-              isMobile,
-              frontImage,
-              backImage,
-              imageFit,
-              lanyardImage,
-              lanyardWidth,
-            }),
-          ),
+        h(
+          Physics,
+          { gravity, timeStep: isMobile ? 1 / 30 : 1 / 60 },
+          h(Band, {
+            isMobile,
+            frontImage,
+            backImage,
+            imageFit,
+            lanyardImage,
+            lanyardWidth,
+          }),
+        ),
         ),
         h(
           Environment,
@@ -239,7 +239,7 @@
       null,
       h(
         "group",
-        { position: [0, 4.25, 0] },
+        { position: [0, 4, 0] },
         h(RigidBody, { ref: fixed, ...segmentProps, type: "fixed" }),
         h(
           RigidBody,
@@ -263,7 +263,7 @@
           h(
             "group",
             {
-              scale: 2.85,
+              scale: 2.95,
               position: [0, -1.2, -0.05],
               onPointerOver: () => hover(true),
               onPointerOut: () => hover(false),
@@ -284,12 +284,22 @@
               roughness: 0.9,
               metalness: 0.8,
             })),
-            h("mesh", {
-              geometry: nodes.clip.geometry,
-              material: materials.metal,
-              "material-roughness": 0.3,
-            }),
-            h("mesh", { geometry: nodes.clamp.geometry, material: materials.metal }),
+            h("mesh", { geometry: nodes.clip.geometry, renderOrder: 3 }, h("meshStandardMaterial", {
+              color: "#e4e4e4",
+              metalness: 1,
+              roughness: 0.18,
+              envMapIntensity: 1.25,
+              emissive: "#111111",
+              emissiveIntensity: 0.08,
+            })),
+            h("mesh", { geometry: nodes.clamp.geometry, renderOrder: 4 }, h("meshStandardMaterial", {
+              color: "#cfd3d9",
+              metalness: 1,
+              roughness: 0.22,
+              envMapIntensity: 1.15,
+              emissive: "#0b0b0b",
+              emissiveIntensity: 0.06,
+            })),
           ),
         ),
       ),
@@ -321,7 +331,7 @@
       backImage: portraitImage,
       imageFit: "cover",
       lanyardImage: defaultLanyardTexture,
-      lanyardWidth: 1.15,
+      lanyardWidth: 1.24,
     });
   }
 
