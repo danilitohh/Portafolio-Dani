@@ -1,376 +1,345 @@
-const cardGLB = new URL("./assets/lanyard/card.glb", import.meta.url).href;
-const lanyardTexture = new URL("./assets/lanyard/lanyard.png", import.meta.url).href;
-const portraitImage = new URL("./assets/portrait-danilo.png", import.meta.url).href;
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.decoding = "async";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-    img.src = url;
-  });
-}
-
-function createPortraitFrameTexture(THREE, img) {
-  if (!img?.width || !img?.height) {
-    return null;
-  }
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 1440;
-  canvas.height = 1960;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    return null;
-  }
-
-  const width = canvas.width;
-  const height = canvas.height;
-  ctx.fillStyle = "#f5f5f5";
-  ctx.fillRect(0, 0, width, height);
-
-  const photoX = 58;
-  const photoY = 58;
-  const photoW = width - 116;
-  const photoH = height - 200;
-
-  ctx.fillStyle = "#111111";
-  ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12);
-  ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(photoX, photoY, photoW, photoH);
-
-  const scale = Math.max(photoW / img.width, photoH / img.height);
-  const drawW = img.width * scale;
-  const drawH = img.height * scale;
-  const drawX = photoX + (photoW - drawW) / 2;
-  const drawY = photoY + (photoH - drawH) / 2;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(photoX, photoY, photoW, photoH);
-  ctx.clip();
-  ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-  const vignette = ctx.createRadialGradient(width / 2, height / 2, Math.min(width, height) * 0.16, width / 2, height / 2, Math.max(width, height) * 0.58);
-  vignette.addColorStop(0, "rgba(255,255,255,0)");
-  vignette.addColorStop(1, "rgba(0,0,0,0.34)");
-  ctx.fillStyle = vignette;
-  ctx.fillRect(photoX, photoY, photoW, photoH);
-  ctx.restore();
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 16;
-  texture.needsUpdate = true;
-  return texture;
-}
-
-function buildErrorFallback(message) {
-  const fallback = document.getElementById("lanyard-fallback");
-  if (!(fallback instanceof HTMLElement)) {
-    return;
-  }
-
-  fallback.innerHTML = `
-    <div style="max-width: 24rem; padding: 1rem; text-align: center; line-height: 1.5;">
-      <p style="margin: 0 0 .6rem; letter-spacing: .14em; text-transform: uppercase; font-size: .68rem; opacity: .75;">Lanyard failed</p>
-      <p style="margin: 0; white-space: pre-wrap; font-size: .72rem; color: #ffb4b4;">${String(message || "Unknown error")}</p>
-    </div>
-  `;
-}
+/* eslint-disable react/no-unknown-property */
+"use client";
 
 (async () => {
+  const ReactMod = await import("https://esm.sh/react@19.2.8");
+  const React = ReactMod.default ?? ReactMod;
+  const { Suspense, useEffect, useMemo, useRef, useState } = React;
+  const { createRoot } = await import("https://esm.sh/react-dom@19.2.8/client");
+  const { Canvas, extend, useFrame } = await import(
+    "https://esm.sh/@react-three/fiber@9.7.0?deps=react@19.2.8,react-dom@19.2.8,three@0.167.1"
+  );
+  const { useGLTF, useTexture, Environment, Lightformer } = await import(
+    "https://esm.sh/@react-three/drei@10.7.7?deps=@react-three/fiber@9.7.0,react@19.2.8,react-dom@19.2.8,three@0.167.1"
+  );
+  const { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } = await import(
+    "https://esm.sh/@react-three/rapier@2.2.0?deps=@react-three/fiber@9.7.0,react@19.2.8,react-dom@19.2.8,three@0.167.1"
+  );
+  const { MeshLineGeometry, MeshLineMaterial } = await import("https://esm.sh/meshline@3.3.1?deps=three@0.167.1");
   const THREE = await import("https://esm.sh/three@0.167.1");
 
-  const root = document.getElementById("root");
-  const fallback = document.getElementById("lanyard-fallback");
+  extend({ MeshLineGeometry, MeshLineMaterial });
 
-  if (!(root instanceof HTMLElement)) {
-    return;
+  const h = React.createElement;
+  const BLANK_PIXEL =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+  const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
+  const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
+
+  const cardGLB = new URL("./assets/lanyard/card.glb", import.meta.url).href;
+  const defaultLanyardTexture = new URL("./assets/lanyard/lanyard.png", import.meta.url).href;
+  const portraitImage = new URL("./assets/portrait-danilo.png", import.meta.url).href;
+
+  function Lanyard({
+    position = [0, 0, 30],
+    gravity = [0, -40, 0],
+    fov = 20,
+    transparent = true,
+    frontImage = null,
+    backImage = null,
+    imageFit = "cover",
+    lanyardImage = null,
+    lanyardWidth = 1,
+  }) {
+    const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    return h(
+      "div",
+      { className: "lanyard-wrapper" },
+      h(
+        Canvas,
+        {
+          camera: { position, fov },
+          dpr: [1, isMobile ? 1.5 : 2],
+          gl: { alpha: transparent },
+          onCreated: ({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1),
+        },
+        h("ambientLight", { intensity: Math.PI }),
+        h(
+          Suspense,
+          { fallback: null },
+          h(
+            Physics,
+            { gravity, timeStep: isMobile ? 1 / 30 : 1 / 60 },
+            h(Band, {
+              isMobile,
+              frontImage,
+              backImage,
+              imageFit,
+              lanyardImage,
+              lanyardWidth,
+            }),
+          ),
+        ),
+        h(
+          Environment,
+          { blur: 0.75 },
+          h(Lightformer, {
+            intensity: 2,
+            color: "white",
+            position: [0, -1, 5],
+            rotation: [0, 0, Math.PI / 3],
+            scale: [100, 0.1, 1],
+          }),
+          h(Lightformer, {
+            intensity: 3,
+            color: "white",
+            position: [-1, -1, 1],
+            rotation: [0, 0, Math.PI / 3],
+            scale: [100, 0.1, 1],
+          }),
+          h(Lightformer, {
+            intensity: 3,
+            color: "white",
+            position: [1, 1, 1],
+            rotation: [0, 0, Math.PI / 3],
+            scale: [100, 0.1, 1],
+          }),
+          h(Lightformer, {
+            intensity: 10,
+            color: "white",
+            position: [-10, 0, 14],
+            rotation: [0, Math.PI / 2, Math.PI / 3],
+            scale: [100, 10, 1],
+          }),
+        ),
+      ),
+    );
   }
 
-  const isMobile = window.matchMedia("(max-width: 767px)").matches;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(isMobile ? 20 : 18, 1, 0.1, 100);
-  camera.position.set(0, 0, isMobile ? 14.2 : 11.9);
+  function Band({
+    maxSpeed = 50,
+    minSpeed = 0,
+    isMobile = false,
+    frontImage = null,
+    backImage = null,
+    imageFit = "cover",
+    lanyardImage = null,
+    lanyardWidth = 1,
+  }) {
+    const band = useRef();
+    const fixed = useRef();
+    const j1 = useRef();
+    const j2 = useRef();
+    const j3 = useRef();
+    const card = useRef();
+    const vec = new THREE.Vector3();
+    const ang = new THREE.Vector3();
+    const rot = new THREE.Vector3();
+    const dir = new THREE.Vector3();
+    const segmentProps = { type: "dynamic", canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+    const { nodes, materials } = useGLTF(cardGLB);
+    const texture = useTexture(lanyardImage || defaultLanyardTexture);
+    const frontTex = useTexture(frontImage || BLANK_PIXEL);
+    const backTex = useTexture(backImage || BLANK_PIXEL);
 
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true,
-    powerPreference: "high-performance",
-  });
+    const cardMap = useMemo(() => {
+      const baseMap = materials.base.map;
+      if (!frontImage && !backImage) return baseMap;
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
-  renderer.setClearColor(0x000000, 0);
-  renderer.setSize(1, 1, false);
-  renderer.domElement.style.display = "block";
-  renderer.domElement.style.width = "100%";
-  renderer.domElement.style.height = "100%";
-  renderer.domElement.style.touchAction = "none";
-  renderer.domElement.style.userSelect = "none";
-  renderer.domElement.style.cursor = "grab";
-  if ("outputColorSpace" in renderer) {
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-  } else {
-    renderer.outputEncoding = THREE.sRGBEncoding;
-  }
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+      const baseImg = baseMap.image;
+      const W = baseImg.width;
+      const H = baseImg.height;
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return baseMap;
+      ctx.drawImage(baseImg, 0, 0, W, H);
 
-  root.innerHTML = "";
-  root.appendChild(renderer.domElement);
+      const drawFitted = (img, rect) => {
+        const rx = rect.x * W;
+        const ry = rect.y * H;
+        const rw = rect.w * W;
+        const rh = rect.h * H;
+        const pick = imageFit === "contain" ? Math.min : Math.max;
+        const scale = pick(rw / img.width, rh / img.height);
+        const dw = img.width * scale;
+        const dh = img.height * scale;
+        const dx = rx + (rw - dw) / 2;
+        const dy = ry + (rh - dh) / 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(rx, ry, rw, rh);
+        ctx.clip();
+        ctx.drawImage(img, dx, dy, dw, dh);
+        ctx.restore();
+      };
 
-  scene.add(new THREE.AmbientLight(0xffffff, 2.05));
+      if (frontImage && frontTex.image) drawFitted(frontTex.image, FRONT_UV_RECT);
+      if (backImage && backTex.image) drawFitted(backTex.image, BACK_UV_RECT);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 2.15);
-  keyLight.position.set(-2.5, 4, 6);
-  scene.add(keyLight);
+      const composite = new THREE.CanvasTexture(canvas);
+      composite.colorSpace = THREE.SRGBColorSpace;
+      composite.flipY = baseMap.flipY;
+      composite.anisotropy = 16;
+      composite.needsUpdate = true;
+      return composite;
+    }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
 
-  const fillLight = new THREE.DirectionalLight(0xdbe4ff, 1.4);
-  fillLight.position.set(2.5, 2, 3);
-  scene.add(fillLight);
+    const [curve] = useState(
+      () =>
+        new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]),
+    );
+    const [dragged, drag] = useState(false);
+    const [hovered, hover] = useState(false);
 
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.65);
-  rimLight.position.set(0, -1.5, 5);
-  scene.add(rimLight);
+    useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
+    useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
+    useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
+    useSphericalJoint(j3, card, [
+      [0, 0, 0],
+      [0, 1.5, 0],
+    ]);
 
-  const textureLoader = new THREE.TextureLoader();
-  void fetch(cardGLB, { cache: "force-cache" }).catch(() => {});
-
-  const [frontImg, ropeTexture] = await Promise.all([
-    loadImage(portraitImage),
-    textureLoader.loadAsync(lanyardTexture),
-  ]);
-
-  const hanger = new THREE.Group();
-  hanger.position.set(0, isMobile ? 3.75 : 4.15, 0);
-  scene.add(hanger);
-
-  const ropeHeight = isMobile ? 3.15 : 3.45;
-  const ropeWidth = isMobile ? 0.1 : 0.12;
-  ropeTexture.wrapS = THREE.RepeatWrapping;
-  ropeTexture.wrapT = THREE.RepeatWrapping;
-  ropeTexture.repeat.set(1, ropeHeight * 1.1);
-  ropeTexture.colorSpace = THREE.SRGBColorSpace;
-
-  const rope = new THREE.Mesh(
-    new THREE.PlaneGeometry(ropeWidth, ropeHeight),
-    new THREE.MeshBasicMaterial({
-      map: ropeTexture,
-      transparent: false,
-      depthWrite: false,
-      toneMapped: false,
-    })
-  );
-  rope.position.set(0, -ropeHeight / 2, 0.02);
-  hanger.add(rope);
-
-  const clip = new THREE.Mesh(
-    new THREE.BoxGeometry(0.16, 0.24, 0.08),
-    new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.15, roughness: 0.4 })
-  );
-  clip.position.set(0, 0.12, 0.05);
-  hanger.add(clip);
-
-  const portraitTexture = createPortraitFrameTexture(THREE, frontImg);
-  const photoCard = new THREE.Mesh(
-    new THREE.PlaneGeometry(isMobile ? 2.6 : 3.1, isMobile ? 3.74 : 4.35),
-    new THREE.MeshStandardMaterial({
-      map: portraitTexture,
-      color: 0xffffff,
-      roughness: 0.9,
-      metalness: 0.02,
-      side: THREE.DoubleSide,
-    })
-  );
-  photoCard.position.set(0, -(ropeHeight - 0.05), 0.08);
-  photoCard.rotation.z = 0.01;
-  hanger.add(photoCard);
-
-  let width = 1;
-  let height = 1;
-  const resize = () => {
-    const rect = root.getBoundingClientRect();
-    width = Math.max(1, rect.width);
-    height = Math.max(1, rect.height);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
-  };
-
-  resize();
-
-  const resizeObserver = new ResizeObserver(resize);
-  resizeObserver.observe(root);
-  window.addEventListener("resize", resize);
-
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
-  const cardTargets = [photoCard];
-
-  let dragging = false;
-  let hover = false;
-  let pointerId = null;
-  let angle = reducedMotion ? -0.04 : -0.07;
-  let angularVelocity = 0;
-  let targetAngle = angle;
-  let lastPointerX = 0;
-  let lastPointerTime = performance.now();
-  let lastFrameTime = performance.now();
-  let rafId = 0;
-
-  const clampAngle = isMobile ? 0.42 : 0.48;
-  const baseCursor = "grab";
-  const activeCursor = "grabbing";
-
-  const setPointer = (event) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
-    return rect;
-  };
-
-  const hitCard = (event) => {
-    setPointer(event);
-    raycaster.setFromCamera(pointer, camera);
-    return raycaster.intersectObjects(cardTargets, true).length > 0;
-  };
-
-  const updateCursor = () => {
-    renderer.domElement.style.cursor = dragging ? activeCursor : hover ? baseCursor : "grab";
-  };
-
-  const onPointerDown = (event) => {
-    if (!cardTargets.length || event.button !== 0) {
-      return;
-    }
-
-    if (!hitCard(event)) {
-      return;
-    }
-
-    dragging = true;
-    pointerId = event.pointerId;
-    lastPointerX = event.clientX;
-    lastPointerTime = performance.now();
-    renderer.domElement.setPointerCapture(pointerId);
-    updateCursor();
-  };
-
-  const onPointerMove = (event) => {
-    const rect = setPointer(event);
-    raycaster.setFromCamera(pointer, camera);
-    hover = raycaster.intersectObjects(cardTargets, true).length > 0;
-
-    if (!dragging || event.pointerId !== pointerId) {
-      updateCursor();
-      return;
-    }
-
-    const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
-    targetAngle = clamp(-normalizedX * 1.3, -clampAngle, clampAngle);
-
-    const now = performance.now();
-    const deltaTime = Math.max((now - lastPointerTime) / 1000, 1 / 240);
-    const deltaX = (event.clientX - lastPointerX) / rect.width;
-    angularVelocity = clamp(deltaX / deltaTime * 0.55, -1.35, 1.35);
-    lastPointerX = event.clientX;
-    lastPointerTime = now;
-    updateCursor();
-  };
-
-  const endDrag = (event) => {
-    if (!dragging) {
-      return;
-    }
-
-    if (event?.pointerId != null && event.pointerId === pointerId) {
-      try {
-        renderer.domElement.releasePointerCapture(pointerId);
-      } catch {
-        // Ignore capture release failures.
+    useEffect(() => {
+      if (hovered) {
+        document.body.style.cursor = dragged ? "grabbing" : "grab";
+        return () => void (document.body.style.cursor = "auto");
       }
-    }
+      return undefined;
+    }, [hovered, dragged]);
 
-    dragging = false;
-    pointerId = null;
-    updateCursor();
-  };
+    useFrame((state, delta) => {
+      if (dragged) {
+        vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+        dir.copy(vec).sub(state.camera.position).normalize();
+        vec.add(dir.multiplyScalar(state.camera.position.length()));
+        [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
+        card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
+      }
+      if (fixed.current) {
+        [j1, j2].forEach((ref) => {
+          if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
+          const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
+          ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+        });
+        curve.points[0].copy(j3.current.translation());
+        curve.points[1].copy(j2.current.lerped);
+        curve.points[2].copy(j1.current.lerped);
+        curve.points[3].copy(fixed.current.translation());
+        band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+        ang.copy(card.current.angvel());
+        rot.copy(card.current.rotation());
+        card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
+      }
+    });
 
-  renderer.domElement.addEventListener("pointerdown", onPointerDown);
-  renderer.domElement.addEventListener("pointermove", onPointerMove);
-  renderer.domElement.addEventListener("pointerup", endDrag);
-  renderer.domElement.addEventListener("pointercancel", endDrag);
-  renderer.domElement.addEventListener("pointerleave", () => {
-    hover = false;
-    if (!dragging) {
-      updateCursor();
-    }
-  });
-  window.addEventListener("blur", () => {
-    dragging = false;
-    pointerId = null;
-    updateCursor();
-  });
+    curve.curveType = "chordal";
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-  const tick = (now) => {
-    const dt = Math.min((now - lastFrameTime) / 1000, 0.033);
-    lastFrameTime = now;
-
-    if (dragging) {
-      const delta = targetAngle - angle;
-      angle += delta * Math.min(1, dt * 16);
-      angularVelocity = delta * 10;
-    } else if (!reducedMotion) {
-      angularVelocity += (-angle * 9.5 - angularVelocity * 2.8) * dt;
-      angle += angularVelocity * dt;
-      angularVelocity *= Math.pow(0.992, dt * 60);
-    }
-
-    angle = clamp(angle, -clampAngle, clampAngle);
-
-    hanger.rotation.z = angle;
-    hanger.rotation.x = angle * 0.03;
-    hanger.position.x = -Math.sin(angle) * (isMobile ? 0.08 : 0.1);
-    hanger.position.y = (isMobile ? 2.55 : 2.75) - Math.abs(angle) * 0.035;
-
-    if (!reducedMotion) {
-      hanger.rotation.y = Math.sin(now * 0.00045) * 0.035;
-    }
-
-    renderer.render(scene, camera);
-    rafId = requestAnimationFrame(tick);
-  };
-
-  updateCursor();
-  if (fallback instanceof HTMLElement) {
-    fallback.remove();
+    return h(
+      React.Fragment,
+      null,
+      h(
+        "group",
+        { position: [0, 4.15, 0] },
+        h(RigidBody, { ref: fixed, ...segmentProps, type: "fixed" }),
+        h(
+          RigidBody,
+          { position: [0.5, 0, 0], ref: j1, ...segmentProps },
+          h(BallCollider, { args: [0.1] }),
+        ),
+        h(
+          RigidBody,
+          { position: [1, 0, 0], ref: j2, ...segmentProps },
+          h(BallCollider, { args: [0.1] }),
+        ),
+        h(
+          RigidBody,
+          { position: [1.5, 0, 0], ref: j3, ...segmentProps },
+          h(BallCollider, { args: [0.1] }),
+        ),
+        h(
+          RigidBody,
+          { position: [2, 0, 0], ref: card, ...segmentProps, type: dragged ? "kinematicPosition" : "dynamic" },
+          h(CuboidCollider, { args: [0.8, 1.125, 0.01] }),
+          h(
+            "group",
+            {
+              scale: 2.25,
+              position: [0, -1.2, -0.05],
+              onPointerOver: () => hover(true),
+              onPointerOut: () => hover(false),
+              onPointerUp: (event) => {
+                event.target.releasePointerCapture(event.pointerId);
+                drag(false);
+              },
+              onPointerDown: (event) => {
+                event.target.setPointerCapture(event.pointerId);
+                drag(new THREE.Vector3().copy(event.point).sub(vec.copy(card.current.translation())));
+              },
+            },
+            h("mesh", { geometry: nodes.card.geometry }, h("meshPhysicalMaterial", {
+              map: cardMap,
+              "map-anisotropy": 16,
+              clearcoat: isMobile ? 0 : 1,
+              clearcoatRoughness: 0.15,
+              roughness: 0.9,
+              metalness: 0.8,
+            })),
+            h("mesh", {
+              geometry: nodes.clip.geometry,
+              material: materials.metal,
+              "material-roughness": 0.3,
+            }),
+            h("mesh", { geometry: nodes.clamp.geometry, material: materials.metal }),
+          ),
+        ),
+      ),
+      h("mesh", { ref: band }, h("meshLineGeometry", null), h("meshLineMaterial", {
+        color: "white",
+        depthTest: false,
+        resolution: isMobile ? [1000, 2000] : [1000, 1000],
+        useMap: true,
+        map: texture,
+        repeat: [-4, 1],
+        lineWidth: lanyardWidth,
+      })),
+    );
   }
 
-  rafId = requestAnimationFrame(tick);
+  useGLTF.preload(cardGLB);
 
-  const cleanup = () => {
-    resizeObserver.disconnect();
-    window.removeEventListener("resize", resize);
-    renderer.domElement.removeEventListener("pointerdown", onPointerDown);
-    renderer.domElement.removeEventListener("pointermove", onPointerMove);
-    renderer.domElement.removeEventListener("pointerup", endDrag);
-    renderer.domElement.removeEventListener("pointercancel", endDrag);
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-    }
-    renderer.dispose();
-  };
+  function App() {
+    useEffect(() => {
+      document.getElementById("lanyard-fallback")?.remove();
+    }, []);
 
-  window.addEventListener("pagehide", cleanup, { once: true });
+    return h(Lanyard, {
+      position: [0, 0, 22],
+      gravity: [0, -40, 0],
+      fov: 20,
+      transparent: true,
+      frontImage: portraitImage,
+      backImage: portraitImage,
+      imageFit: "cover",
+      lanyardImage: defaultLanyardTexture,
+      lanyardWidth: 1.08,
+    });
+  }
+
+  const root = document.getElementById("root");
+  if (root) {
+    createRoot(root).render(h(App));
+  }
 })().catch((error) => {
   console.error("Failed to initialize lanyard portrait:", error);
-  buildErrorFallback(error?.stack || error?.message || error);
+  const fallback = document.getElementById("lanyard-fallback");
+  if (fallback instanceof HTMLElement) {
+    fallback.textContent = `Lanyard failed: ${error?.stack || error?.message || error}`;
+    fallback.style.color = "#ffb4b4";
+    fallback.style.textAlign = "center";
+    fallback.style.padding = "1rem";
+    fallback.style.lineHeight = "1.45";
+    fallback.style.maxWidth = "24rem";
+    fallback.style.whiteSpace = "pre-wrap";
+    fallback.style.fontSize = "0.68rem";
+  }
 });
