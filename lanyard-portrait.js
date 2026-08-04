@@ -316,7 +316,7 @@
       position: [0, 0, 17.5],
       gravity: [0, -40, 0],
       fov: 18,
-      transparent: false,
+      transparent: true,
       frontImage: portraitImage,
       backImage: portraitImage,
       imageFit: "cover",
