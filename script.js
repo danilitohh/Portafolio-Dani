@@ -1374,14 +1374,27 @@ function createAboutHighlightCard(item, index = 0) {
 }
 
 const PORTRAIT_IMAGE_FILE = "assets/portrait-danilo.png";
+const LANYARD_EMBED_URL = "lanyard-portrait.html?v=2026-08-04-3";
 
 function createPortraitCard(variant = "hero") {
   const role = PROFILE.role[currentLang];
   const eager = variant === "hero";
-  const swingAttributes = variant === "hero" ? 'data-portrait-swing aria-label="Retrato colgante de Danilo Herrera Hernández. Arrastra para balancearlo."' : `aria-label="${PROFILE.name}"`;
+
+  if (variant === "hero") {
+    return `
+      <div class="lanyard-shell" aria-label="Retrato colgante de Danilo Herrera Hernández">
+        <iframe
+          class="lanyard-shell__frame"
+          src="${LANYARD_EMBED_URL}"
+          title="Retrato colgante de Danilo Herrera Hernández"
+          loading="eager"
+        ></iframe>
+      </div>
+    `;
+  }
 
   return `
-    <figure class="portrait portrait--${variant}" ${swingAttributes}>
+    <figure class="portrait portrait--${variant}" aria-label="${PROFILE.name}">
       <span class="portrait__string" aria-hidden="true"></span>
       <span class="portrait__clip" aria-hidden="true"></span>
       <div class="portrait__frame">
@@ -1397,12 +1410,10 @@ function createPortraitCard(variant = "hero") {
             ${eager ? 'fetchpriority="high"' : ""}
           />
         </div>
-        ${variant === "hero" ? "" : `
-          <figcaption class="portrait__caption">
-            <span>${PROFILE.name}</span>
-            <small>${role}</small>
-          </figcaption>
-        `}
+        <figcaption class="portrait__caption">
+          <span>${PROFILE.name}</span>
+          <small>${role}</small>
+        </figcaption>
       </div>
     </figure>
   `;

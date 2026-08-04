@@ -3260,6 +3260,34 @@ body[data-preview-section="contact"] .footer {
   padding-top: 0.5rem;
 }
 
+.lanyard-shell {
+  position: relative;
+  width: min(100%, 30.5rem);
+  height: min(46rem, 78svh);
+  margin: 0;
+  overflow: hidden;
+  border-radius: 1.35rem;
+  isolation: isolate;
+}
+
+.lanyard-shell__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.lanyard-shell__frame {
+  overflow: hidden;
+}
+
+.lanyard-shell__frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .portrait--hero {
   margin-top: clamp(-3.25rem, -3vw, -1.6rem);
 }
@@ -4171,6 +4199,11 @@ body[data-preview-section="contact"] .footer {
     padding-top: 0.75rem;
   }
 
+  .lanyard-shell {
+    width: min(100%, 24rem);
+    height: min(38rem, 72svh);
+  }
+
   .hero__headline {
     font-size: clamp(3rem, 16vw, 5rem);
   }
@@ -4215,6 +4248,11 @@ body[data-preview-section="contact"] .footer {
   .portrait {
     width: min(100%, 21rem);
     cursor: default;
+  }
+
+  .lanyard-shell {
+    width: min(100%, 22rem);
+    height: min(34rem, 66svh);
   }
 
   .portrait--hero {
