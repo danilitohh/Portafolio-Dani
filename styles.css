@@ -3266,6 +3266,7 @@ body[data-preview-section="contact"] .footer {
 }
 
 .lanyard-shell {
+  --lanyard-top-extension: clamp(7.5rem, 10vw, 9rem);
   position: relative;
   width: min(100%, 31rem);
   height: min(47rem, 80svh);
@@ -3273,6 +3274,21 @@ body[data-preview-section="contact"] .footer {
   overflow: visible;
   border-radius: 1.35rem;
   isolation: isolate;
+}
+
+.lanyard-shell::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--lanyard-top-extension));
+  left: 50%;
+  width: clamp(0.68rem, 0.9vw, 0.82rem);
+  height: calc(var(--lanyard-top-extension) + 3.25rem);
+  transform: translateX(-50%);
+  border-inline: 1px solid rgba(255, 255, 255, 0.045);
+  background: linear-gradient(90deg, #010101 0%, #151515 48%, #030303 100%);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.48);
+  pointer-events: none;
 }
 
 .lanyard-shell__canvas {
@@ -4210,6 +4226,7 @@ body[data-preview-section="contact"] .footer {
   }
 
   .lanyard-shell {
+    --lanyard-top-extension: 16rem;
     width: min(100%, 24rem);
     height: min(38rem, 72svh);
   }
