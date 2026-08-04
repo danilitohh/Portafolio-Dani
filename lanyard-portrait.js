@@ -9,7 +9,7 @@
   const { Canvas, extend, useFrame } = await import(
     "https://esm.sh/@react-three/fiber@9.7.0?deps=react@19.2.8,react-dom@19.2.8,three@0.167.1"
   );
-  const { useGLTF, useTexture, Environment, Lightformer } = await import(
+  const { useGLTF, useTexture } = await import(
     "https://esm.sh/@react-three/drei@10.7.7?deps=@react-three/fiber@9.7.0,react@19.2.8,react-dom@19.2.8,three@0.167.1"
   );
   const { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } = await import(
@@ -57,57 +57,32 @@
         {
           camera: { position, fov },
           dpr: [1, isMobile ? 1.5 : 2],
-          gl: { alpha: transparent },
-          onCreated: ({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1),
+          gl: { alpha: transparent, antialias: true },
+          style: { background: "transparent" },
+          onCreated: ({ gl, scene }) => {
+            gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+            gl.setClearAlpha(transparent ? 0 : 1);
+            scene.background = transparent ? null : new THREE.Color(0x000000);
+          },
         },
-        h("ambientLight", { intensity: Math.PI }),
+        h("ambientLight", { intensity: 1.65 }),
+        h("directionalLight", { position: [3, 4, 5], intensity: 1.5 }),
+        h("directionalLight", { position: [-2, -1, 4], intensity: 0.75 }),
         h(
           Suspense,
           { fallback: null },
-        h(
-          Physics,
-          { gravity, timeStep: isMobile ? 1 / 30 : 1 / 60 },
-          h(Band, {
-            isMobile,
-            frontImage,
-            backImage,
-            imageFit,
-            lanyardImage,
-            lanyardWidth,
-          }),
-        ),
-        ),
-        h(
-          Environment,
-          { blur: 0.75 },
-          h(Lightformer, {
-            intensity: 2,
-            color: "white",
-            position: [0, -1, 5],
-            rotation: [0, 0, Math.PI / 3],
-            scale: [100, 0.1, 1],
-          }),
-          h(Lightformer, {
-            intensity: 3,
-            color: "white",
-            position: [-1, -1, 1],
-            rotation: [0, 0, Math.PI / 3],
-            scale: [100, 0.1, 1],
-          }),
-          h(Lightformer, {
-            intensity: 3,
-            color: "white",
-            position: [1, 1, 1],
-            rotation: [0, 0, Math.PI / 3],
-            scale: [100, 0.1, 1],
-          }),
-          h(Lightformer, {
-            intensity: 10,
-            color: "white",
-            position: [-10, 0, 14],
-            rotation: [0, Math.PI / 2, Math.PI / 3],
-            scale: [100, 10, 1],
-          }),
+          h(
+            Physics,
+            { gravity, timeStep: isMobile ? 1 / 30 : 1 / 60 },
+            h(Band, {
+              isMobile,
+              frontImage,
+              backImage,
+              imageFit,
+              lanyardImage,
+              lanyardWidth,
+            }),
+          ),
         ),
       ),
     );
@@ -151,7 +126,7 @@
       canvas.height = H;
       const ctx = canvas.getContext("2d");
       if (!ctx) return baseMap;
-      ctx.drawImage(baseImg, 0, 0, W, H);
+      ctx.clearRect(0, 0, W, H);
 
       const drawFitted = (img, rect) => {
         const rx = rect.x * W;
@@ -283,6 +258,9 @@
               clearcoatRoughness: 0.15,
               roughness: 0.9,
               metalness: 0.8,
+              transparent: true,
+              alphaTest: 0.02,
+              depthWrite: false,
             })),
             h("mesh", { geometry: nodes.clip.geometry, renderOrder: 3 }, h("meshStandardMaterial", {
               color: "#e4e4e4",
@@ -305,7 +283,8 @@
       ),
       h("mesh", { ref: band }, h("meshLineGeometry", null), h("meshLineMaterial", {
         color: "white",
-        depthTest: false,
+        depthTest: true,
+        depthWrite: false,
         resolution: isMobile ? [1000, 2000] : [1000, 1000],
         useMap: true,
         map: texture,
@@ -331,7 +310,7 @@
       backImage: portraitImage,
       imageFit: "cover",
       lanyardImage: defaultLanyardTexture,
-      lanyardWidth: 1.24,
+      lanyardWidth: 1.12,
     });
   }
 
