@@ -4,6 +4,19 @@ const APP_VERSION = "2026-07-30-3";
 const INTRO_STORAGE_KEY = `portfolio-intro-seen-${APP_VERSION}`;
 const ACTIVE_SECTION_IDS = ["home", "about", "showcase", "contact"];
 const SHOWCASE_TABS = ["projects", "certificates", "technologies"];
+const PROJECT_ASSET_URLS = import.meta.glob(
+  [
+    "./assets/projects/**/gallery/*.png",
+    "./assets/projects/*/cover.png",
+    "./assets/projects/contaduria-juliana/*.png",
+  ],
+  { eager: true, query: "?url", import: "default" },
+);
+
+function resolveProjectAsset(path) {
+  const normalizedPath = path.startsWith("./") ? path : `./${path}`;
+  return PROJECT_ASSET_URLS[normalizedPath] || normalizedPath;
+}
 
 // Edita este bloque con tu información real cuando quieras personalizar el sitio.
 const PROFILE = {
@@ -163,7 +176,7 @@ const CONTENT = {
           type: "Tienda online",
           slug: "ambrosia-bhang",
           title: "Tienda online - Ambrosia Bhang",
-          image: "assets/projects/ambrosia-bhang/gallery/03.png",
+          image: resolveProjectAsset("assets/projects/ambrosia-bhang/cover.png"),
           imageAlt: "Vista previa de la tienda online Ambrosia Bhang",
           liveUrl: "https://ambrosia-eosin.vercel.app",
           repoUrl: "https://github.com/danilitohh/ambrosia-tienda-virtual",
@@ -177,7 +190,7 @@ const CONTENT = {
           type: "Gestión veterinaria",
           slug: "lativet",
           title: "Sistema de Gestión Veterinaria - LatiVet",
-          image: "assets/projects/lativet/gallery/02.png",
+          image: resolveProjectAsset("assets/projects/lativet/cover.png"),
           imageAlt: "Vista previa del sistema veterinario Lativet",
           liveUrl: "https://lativet.vercel.app",
           repoUrl: "https://github.com/danilitohh/Lativet",
@@ -191,7 +204,7 @@ const CONTENT = {
           type: "Seguimiento comercial",
           slug: "hessa-enterprises",
           title: "Sistema de Seguimiento Comercial por Gmail - Hessa Enterprises",
-          image: "assets/projects/hessa-enterprises/gallery/01.png",
+          image: resolveProjectAsset("assets/projects/hessa-enterprises/cover.png"),
           imageAlt: "Vista previa del sistema de seguimiento por Gmail Hessa Enterprises",
           liveUrl: "https://hessaenterprises.vercel.app",
           repoUrl: "https://github.com/danilitohh/Hessaenterprises",
@@ -205,7 +218,7 @@ const CONTENT = {
           type: "Plataforma administrativa",
           slug: "contaduria-juliana",
           title: "Nexo Admin - Plataforma Administrativa y Contable",
-          image: "assets/projects/contaduria-juliana/cover.png",
+          image: resolveProjectAsset("assets/projects/contaduria-juliana/cover.png"),
           imageAlt: "Vista previa de Nexo Admin",
           liveUrl: "https://contaduria-juliana.vercel.app",
           repoUrl: "https://github.com/danilitohh/Contaduria_Juliana",
@@ -387,7 +400,7 @@ const CONTENT = {
           type: "Online store",
           slug: "ambrosia-bhang",
           title: "Online store - Ambrosia Bhang",
-          image: "assets/projects/ambrosia-bhang/gallery/03.png",
+          image: resolveProjectAsset("assets/projects/ambrosia-bhang/cover.png"),
           imageAlt: "Preview of the Ambrosia Bhang online store",
           liveUrl: "https://ambrosia-eosin.vercel.app",
           repoUrl: "https://github.com/danilitohh/ambrosia-tienda-virtual",
@@ -401,7 +414,7 @@ const CONTENT = {
           type: "Veterinary management",
           slug: "lativet",
           title: "Veterinary Management System - LatiVet",
-          image: "assets/projects/lativet/gallery/02.png",
+          image: resolveProjectAsset("assets/projects/lativet/cover.png"),
           imageAlt: "Preview of the Lativet veterinary system",
           liveUrl: "https://lativet.vercel.app",
           repoUrl: "https://github.com/danilitohh/Lativet",
@@ -415,7 +428,7 @@ const CONTENT = {
           type: "Sales follow-up",
           slug: "hessa-enterprises",
           title: "Commercial Follow-up System via Gmail - Hessa Enterprises",
-          image: "assets/projects/hessa-enterprises/gallery/01.png",
+          image: resolveProjectAsset("assets/projects/hessa-enterprises/cover.png"),
           imageAlt: "Preview of the Hessa Enterprises Gmail follow-up system",
           liveUrl: "https://hessaenterprises.vercel.app",
           repoUrl: "https://github.com/danilitohh/Hessaenterprises",
@@ -429,7 +442,7 @@ const CONTENT = {
           type: "Administrative platform",
           slug: "contaduria-juliana",
           title: "Nexo Admin - Administrative and Accounting Platform",
-          image: "assets/projects/contaduria-juliana/cover.png",
+          image: resolveProjectAsset("assets/projects/contaduria-juliana/cover.png"),
           imageAlt: "Preview of Nexo Admin",
           liveUrl: "https://contaduria-juliana.vercel.app",
           repoUrl: "https://github.com/danilitohh/Contaduria_Juliana",
@@ -1188,56 +1201,56 @@ const PROJECT_DETAILS = {
   "contaduria-juliana": {
     gallery: [
       {
-        src: "assets/projects/contaduria-juliana/cover.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/cover.png"),
         alt: {
           es: "Portada principal de Nexo Admin",
           en: "Main cover for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/company-selector.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/company-selector.png"),
         alt: {
           es: "Selector de empresa de Nexo Admin",
           en: "Company selector for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/dashboard-home.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/dashboard-home.png"),
         alt: {
           es: "Dashboard principal de Nexo Admin",
           en: "Main dashboard for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/products.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/products.png"),
         alt: {
           es: "Módulo de productos de Nexo Admin",
           en: "Products module for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/invoices.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/invoices.png"),
         alt: {
           es: "Módulo de facturas de Nexo Admin",
           en: "Invoices module for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/pos.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/pos.png"),
         alt: {
           es: "Punto de venta de Nexo Admin",
           en: "POS screen for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/configuracion.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/configuracion.png"),
         alt: {
           es: "Configuración de Nexo Admin",
           en: "Settings screen for Nexo Admin",
         },
       },
       {
-        src: "assets/projects/contaduria-juliana/reports.png",
+        src: resolveProjectAsset("assets/projects/contaduria-juliana/reports.png"),
         alt: {
           es: "Reportes de Nexo Admin",
           en: "Reports screen for Nexo Admin",
@@ -2160,7 +2173,7 @@ function buildSequentialGallery(basePath, count, label) {
   return Array.from({ length: count }, (_, index) => {
     const imageNumber = String(index + 1).padStart(2, "0");
     return {
-      src: `${basePath}/${imageNumber}.png`,
+      src: resolveProjectAsset(`${basePath}/${imageNumber}.png`),
       alt: {
         es: `${label.es} ${index + 1}`,
         en: `${label.en} ${index + 1}`,
