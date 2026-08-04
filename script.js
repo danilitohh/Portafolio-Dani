@@ -526,6 +526,7 @@ let appInteractionsBound = false;
 let pageRevealObserver = null;
 let activeSectionObserver = null;
 let scrollChromeFrame = 0;
+let lanyardStrapFrame = 0;
 let scrollChromeBound = false;
 let activeSectionId = ACTIVE_SECTION_IDS[0];
 let introTimerId = 0;
@@ -1739,6 +1740,11 @@ function buildPageMarkup(copy, shouldShowIntro) {
   return `
     ${shouldShowIntro ? createIntroOverlay() : ""}
     <div class="page">
+      <div class="lanyard-page-strap" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
       <header class="topbar">
         <div class="shell topbar__inner">
           <a class="brand" href="#home" aria-label="Home">
@@ -1862,6 +1868,34 @@ function scheduleScrollChrome() {
   scrollChromeFrame = window.requestAnimationFrame(syncScrollChrome);
 }
 
+function scheduleLanyardStrapSync() {
+  if (lanyardStrapFrame) {
+    return;
+  }
+
+  lanyardStrapFrame = window.requestAnimationFrame(syncLanyardPageStrap);
+}
+
+function syncLanyardPageStrap() {
+  lanyardStrapFrame = 0;
+
+  const page = document.querySelector(".page");
+  const strap = document.querySelector(".lanyard-page-strap");
+  const shell = document.querySelector(".lanyard-shell");
+  if (!(page instanceof HTMLElement) || !(strap instanceof HTMLElement) || !(shell instanceof HTMLElement)) {
+    return;
+  }
+
+  const pageRect = page.getBoundingClientRect();
+  const shellRect = shell.getBoundingClientRect();
+  const centerX = shellRect.left - pageRect.left + shellRect.width / 2;
+  const height = Math.max(0, shellRect.top - pageRect.top + 52);
+
+  strap.style.setProperty("--lanyard-strap-x", `${centerX}px`);
+  strap.style.setProperty("--lanyard-strap-height", `${height}px`);
+  strap.classList.add("is-positioned");
+}
+
 function syncScrollChrome() {
   scrollChromeFrame = 0;
 
@@ -1885,6 +1919,8 @@ function bindScrollChrome() {
   window.addEventListener("orientationchange", scheduleScrollChrome, { passive: true });
   window.addEventListener("resize", syncShowcaseTabs, { passive: true });
   window.addEventListener("orientationchange", syncShowcaseTabs, { passive: true });
+  window.addEventListener("resize", scheduleLanyardStrapSync, { passive: true });
+  window.addEventListener("orientationchange", scheduleLanyardStrapSync, { passive: true });
 }
 
 function setupActiveSectionObserver() {
@@ -2447,6 +2483,8 @@ function setupPageAnimations() {
   bindScrollChrome();
   setupActiveSectionObserver();
   syncScrollChrome();
+  scheduleLanyardStrapSync();
+  document.fonts?.ready.then(scheduleLanyardStrapSync);
 
   if (prefersReducedMotion()) {
     if (pageRevealObserver) {

@@ -13,7 +13,7 @@ class LanyardPortraitElement extends HTMLElement {
         fov={16}
         transparent
         imageFit="cover"
-        lanyardWidth={0.7}
+        lanyardWidth={1}
       />,
     );
   }

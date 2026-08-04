@@ -34,7 +34,7 @@ export default function Lanyard({
   backImage = portraitImage,
   imageFit = "cover",
   lanyardImage = defaultLanyardImage,
-  lanyardWidth = 0.7,
+  lanyardWidth = 1,
 }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -163,16 +163,24 @@ function Band({
       const rectY = rect.y * height;
       const rectWidth = rect.w * width;
       const rectHeight = rect.h * height;
+      const insetX = rectWidth * 0.045;
+      const insetY = rectHeight * 0.04;
+      const contentX = rectX + insetX;
+      const contentY = rectY + insetY;
+      const contentWidth = rectWidth - insetX * 2;
+      const contentHeight = rectHeight - insetY * 2;
       const fit = imageFit === "contain" ? Math.min : Math.max;
-      const scale = fit(rectWidth / image.width, rectHeight / image.height);
+      const scale = fit(contentWidth / image.width, contentHeight / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
-      const drawX = rectX + (rectWidth - drawWidth) / 2;
-      const drawY = rectY + (rectHeight - drawHeight) / 2;
+      const drawX = contentX + (contentWidth - drawWidth) / 2;
+      const drawY = contentY + (contentHeight - drawHeight) / 2;
 
       context.save();
+      context.fillStyle = "#f2f2f0";
+      context.fillRect(rectX, rectY, rectWidth, rectHeight);
       context.beginPath();
-      context.rect(rectX, rectY, rectWidth, rectHeight);
+      context.rect(contentX, contentY, contentWidth, contentHeight);
       context.clip();
       context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
       context.restore();
