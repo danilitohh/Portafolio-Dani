@@ -1374,7 +1374,7 @@ function createAboutHighlightCard(item, index = 0) {
 }
 
 const PORTRAIT_IMAGE_FILE = "assets/portrait-danilo.png";
-const LANYARD_EMBED_URL = "lanyard-portrait.html?v=2026-08-04-6";
+const LANYARD_EMBED_URL = "lanyard-portrait.html?v=2026-08-04-8";
 
 function createPortraitCard(variant = "hero") {
   const role = PROFILE.role[currentLang];
@@ -1388,6 +1388,7 @@ function createPortraitCard(variant = "hero") {
           src="${LANYARD_EMBED_URL}"
           title="Retrato colgante de Danilo Herrera Hernández"
           loading="eager"
+          allowtransparency="true"
         ></iframe>
       </div>
     `;

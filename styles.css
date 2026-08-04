@@ -3068,6 +3068,8 @@ body[data-preview-section="contact"] .footer {
 }
 
 .hero__content {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 1.1rem;
   align-content: center;
@@ -3254,6 +3256,8 @@ body[data-preview-section="contact"] .footer {
 }
 
 .hero__visual {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
