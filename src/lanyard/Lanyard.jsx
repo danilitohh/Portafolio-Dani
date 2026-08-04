@@ -21,6 +21,68 @@ const BLANK_PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
+const LOGO_STOPS = [0.2, 0.45, 0.7];
+
+function cubicPoint(start, controlA, controlB, end, amount) {
+  const inverse = 1 - amount;
+  return (
+    inverse ** 3 * start +
+    3 * inverse ** 2 * amount * controlA +
+    3 * inverse * amount ** 2 * controlB +
+    amount ** 3 * end
+  );
+}
+
+function cubicTangent(start, controlA, controlB, end, amount) {
+  const inverse = 1 - amount;
+  return (
+    3 * inverse ** 2 * (controlA - start) +
+    6 * inverse * amount * (controlB - controlA) +
+    3 * amount ** 2 * (end - controlB)
+  );
+}
+
+function syncLanyardDom(domRef, { anchorX, hookX, hookY, textureUrl }) {
+  if (!domRef.current?.strap?.isConnected) {
+    const page = document.querySelector(".page");
+    const strap = document.querySelector(".lanyard-page-strap");
+    const band = document.querySelector("[data-lanyard-path]");
+    const shadow = document.querySelector("[data-lanyard-path-shadow]");
+    const logos = [...document.querySelectorAll("[data-lanyard-logo]")];
+    if (!(page instanceof HTMLElement) || !(strap instanceof HTMLElement) || !band || !shadow) return;
+    domRef.current = { page, strap, band, shadow, logos };
+  }
+
+  const { page, strap, band, shadow, logos } = domRef.current;
+  const pageRect = page.getBoundingClientRect();
+  const localAnchorX = anchorX - pageRect.left;
+  const localHookX = hookX - pageRect.left;
+  const localHookY = Math.max(96, hookY - pageRect.top);
+  const horizontalTravel = localHookX - localAnchorX;
+  const controlAX = localAnchorX + horizontalTravel * 0.32;
+  const controlAY = localHookY * 0.32;
+  const controlBX = localAnchorX + horizontalTravel * 0.68;
+  const controlBY = localHookY * 0.68;
+  const pathData = `M ${localAnchorX} 0 C ${controlAX} ${controlAY}, ${controlBX} ${controlBY}, ${localHookX} ${localHookY}`;
+
+  strap.style.height = `${Math.max(window.innerHeight, localHookY + 48)}px`;
+  strap.style.setProperty("--lanyard-texture", `url("${textureUrl}")`);
+  band.setAttribute("d", pathData);
+  shadow.setAttribute("d", pathData);
+
+  logos.forEach((logo, index) => {
+    if (!(logo instanceof HTMLElement)) return;
+    const amount = LOGO_STOPS[index] ?? 0.5;
+    const x = cubicPoint(localAnchorX, controlAX, controlBX, localHookX, amount);
+    const y = cubicPoint(0, controlAY, controlBY, localHookY, amount);
+    const tangentX = cubicTangent(localAnchorX, controlAX, controlBX, localHookX, amount);
+    const tangentY = cubicTangent(0, controlAY, controlBY, localHookY, amount);
+    const angle = Math.atan2(tangentY, tangentX) * (180 / Math.PI) - 90;
+    logo.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${angle}deg)`;
+  });
+
+  strap.classList.add("is-positioned");
+}
 
 export default function Lanyard({
   position = [0, 0, 13.5],
@@ -119,25 +181,22 @@ function Band({
   const j2 = useRef();
   const j3 = useRef();
   const card = useRef();
-  const cardVisual = useRef();
   const hasStartedSwing = useRef(false);
   const vec = useMemo(() => new THREE.Vector3(), []);
   const ang = useMemo(() => new THREE.Vector3(), []);
   const rot = useMemo(() => new THREE.Vector3(), []);
   const dir = useMemo(() => new THREE.Vector3(), []);
+  const trackedCardPosition = useMemo(() => new THREE.Vector3(), []);
   const hookProjection = useMemo(() => new THREE.Vector3(), []);
+  const hookOffset = useMemo(() => new THREE.Vector3(), []);
+  const cardQuaternion = useMemo(() => new THREE.Quaternion(), []);
+  const lanyardDom = useRef(null);
   const { nodes, materials } = useGLTF(cardGLB);
-  const hookLocalPoint = useMemo(() => {
-    nodes.clip.geometry.computeBoundingBox();
-    const bounds = nodes.clip.geometry.boundingBox;
-    if (!bounds) return new THREE.Vector3(0, 1.229, 0);
-    return new THREE.Vector3(
-      (bounds.min.x + bounds.max.x) / 2,
-      bounds.max.y,
-      (bounds.min.z + bounds.max.z) / 2,
-    );
-  }, [nodes.clip.geometry]);
-  const lastMotion = useRef({ anchorX: Number.NaN, hookX: Number.NaN, hookY: Number.NaN });
+  const lastMotion = useRef({
+    anchorX: Number.POSITIVE_INFINITY,
+    hookX: Number.POSITIVE_INFINITY,
+    hookY: Number.POSITIVE_INFINITY,
+  });
   const segmentProps = {
     type: "dynamic",
     canSleep: true,
@@ -230,19 +289,21 @@ function Band({
   }, [hovered, dragged]);
 
   useFrame((state) => {
+    const currentPosition = card.current?.translation();
+    if (currentPosition) {
+      trackedCardPosition.set(currentPosition.x, currentPosition.y, currentPosition.z);
+    }
+
     if (dragged) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
-      card.current?.setNextKinematicTranslation({
-        x: vec.x - dragged.x,
-        y: vec.y - dragged.y,
-        z: vec.z - dragged.z,
-      });
+      trackedCardPosition.set(vec.x - dragged.x, vec.y - dragged.y, vec.z - dragged.z);
+      card.current?.setNextKinematicTranslation(trackedCardPosition);
     }
 
-    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current || !cardVisual.current) {
+    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current) {
       return;
     }
 
@@ -260,9 +321,9 @@ function Band({
     card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
 
     const canvasRect = state.gl.domElement.getBoundingClientRect();
-    cardVisual.current.updateWorldMatrix(true, false);
-    hookProjection.copy(hookLocalPoint);
-    cardVisual.current.localToWorld(hookProjection);
+    cardQuaternion.copy(card.current.rotation());
+    hookOffset.set(0, 1.565, 0).applyQuaternion(cardQuaternion);
+    hookProjection.copy(trackedCardPosition).add(hookOffset);
     hookProjection.project(state.camera);
 
     const anchorX = canvasRect.left + canvasRect.width / 2;
@@ -276,17 +337,12 @@ function Band({
       Math.abs(previous.hookY - hookY) > 0.25
     ) {
       lastMotion.current = { anchorX, hookX, hookY };
-      window.dispatchEvent(
-        new CustomEvent("portfolio-lanyard-motion", {
-          detail: {
-            anchorX,
-            hookX,
-            hookY,
-            textureUrl: lanyardImage || defaultLanyardImage,
-            width: lanyardWidth,
-          },
-        }),
-      );
+      syncLanyardDom(lanyardDom, {
+        anchorX,
+        hookX,
+        hookY,
+        textureUrl: lanyardImage || defaultLanyardImage,
+      });
     }
   });
 
@@ -316,7 +372,6 @@ function Band({
         >
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
-            ref={cardVisual}
             scale={2.25}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => setHovered(true)}

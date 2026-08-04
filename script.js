@@ -527,8 +527,6 @@ let pageRevealObserver = null;
 let activeSectionObserver = null;
 let scrollChromeFrame = 0;
 let lanyardStrapFrame = 0;
-let lanyardMotionFrame = 0;
-let pendingLanyardMotion = null;
 let scrollChromeBound = false;
 let activeSectionId = ACTIVE_SECTION_IDS[0];
 let introTimerId = 0;
@@ -1963,32 +1961,6 @@ function drawLanyardPath(anchorX, hookX, hookY, textureUrl = "") {
   strap.classList.add("is-positioned");
 }
 
-function handleLanyardMotion(event) {
-  if (!(event instanceof CustomEvent) || !event.detail) {
-    return;
-  }
-
-  pendingLanyardMotion = event.detail;
-  if (lanyardMotionFrame) {
-    return;
-  }
-
-  lanyardMotionFrame = window.requestAnimationFrame(() => {
-    lanyardMotionFrame = 0;
-    const motion = pendingLanyardMotion;
-    pendingLanyardMotion = null;
-    const page = document.querySelector(".page");
-    if (!(page instanceof HTMLElement) || !motion) return;
-    const pageRect = page.getBoundingClientRect();
-    drawLanyardPath(
-      motion.anchorX - pageRect.left,
-      motion.hookX - pageRect.left,
-      motion.hookY - pageRect.top,
-      motion.textureUrl,
-    );
-  });
-}
-
 function syncScrollChrome() {
   scrollChromeFrame = 0;
 
@@ -2014,7 +1986,6 @@ function bindScrollChrome() {
   window.addEventListener("orientationchange", syncShowcaseTabs, { passive: true });
   window.addEventListener("resize", scheduleLanyardStrapSync, { passive: true });
   window.addEventListener("orientationchange", scheduleLanyardStrapSync, { passive: true });
-  window.addEventListener("portfolio-lanyard-motion", handleLanyardMotion);
 }
 
 function setupActiveSectionObserver() {
