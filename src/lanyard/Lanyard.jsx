@@ -119,15 +119,24 @@ function Band({
   const j2 = useRef();
   const j3 = useRef();
   const card = useRef();
+  const cardVisual = useRef();
   const hasStartedSwing = useRef(false);
   const vec = useMemo(() => new THREE.Vector3(), []);
   const ang = useMemo(() => new THREE.Vector3(), []);
   const rot = useMemo(() => new THREE.Vector3(), []);
   const dir = useMemo(() => new THREE.Vector3(), []);
-  const anchorProjection = useMemo(() => new THREE.Vector3(), []);
   const hookProjection = useMemo(() => new THREE.Vector3(), []);
-  const hookOffset = useMemo(() => new THREE.Vector3(), []);
-  const cardRotation = useMemo(() => new THREE.Quaternion(), []);
+  const { nodes, materials } = useGLTF(cardGLB);
+  const hookLocalPoint = useMemo(() => {
+    nodes.clip.geometry.computeBoundingBox();
+    const bounds = nodes.clip.geometry.boundingBox;
+    if (!bounds) return new THREE.Vector3(0, 1.229, 0);
+    return new THREE.Vector3(
+      (bounds.min.x + bounds.max.x) / 2,
+      bounds.max.y,
+      (bounds.min.z + bounds.max.z) / 2,
+    );
+  }, [nodes.clip.geometry]);
   const lastMotion = useRef({ anchorX: Number.NaN, hookX: Number.NaN, hookY: Number.NaN });
   const segmentProps = {
     type: "dynamic",
@@ -136,7 +145,6 @@ function Band({
     angularDamping: 4,
     linearDamping: 4,
   };
-  const { nodes, materials } = useGLTF(cardGLB);
   const frontTexture = useTexture(frontImage || BLANK_PIXEL);
   const backTexture = useTexture(backImage || BLANK_PIXEL);
 
@@ -234,29 +242,30 @@ function Band({
       });
     }
 
-    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current) return;
+    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current || !cardVisual.current) {
+      return;
+    }
 
     if (!hasStartedSwing.current) {
       hasStartedSwing.current = true;
-      card.current.applyTorqueImpulse({ x: 0, y: isMobile ? 0.003 : 0.008, z: 0 }, true);
+      card.current.applyImpulse({ x: isMobile ? 0.08 : 0.18, y: 0, z: 0 }, true);
+      card.current.applyTorqueImpulse(
+        { x: 0, y: isMobile ? 0.003 : 0.008, z: isMobile ? 0.006 : 0.014 },
+        true,
+      );
     }
 
     ang.copy(card.current.angvel());
     rot.copy(card.current.rotation());
     card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
 
-    const fixedPosition = fixed.current.translation();
-    const cardPosition = card.current.translation();
-    cardRotation.copy(card.current.rotation());
-    hookOffset.set(0, 1.5, 0).applyQuaternion(cardRotation);
-    anchorProjection.set(fixedPosition.x, fixedPosition.y, fixedPosition.z).project(state.camera);
-    hookProjection
-      .set(cardPosition.x, cardPosition.y, cardPosition.z)
-      .add(hookOffset)
-      .project(state.camera);
-
     const canvasRect = state.gl.domElement.getBoundingClientRect();
-    const anchorX = canvasRect.left + (anchorProjection.x * 0.5 + 0.5) * canvasRect.width;
+    cardVisual.current.updateWorldMatrix(true, false);
+    hookProjection.copy(hookLocalPoint);
+    cardVisual.current.localToWorld(hookProjection);
+    hookProjection.project(state.camera);
+
+    const anchorX = canvasRect.left + canvasRect.width / 2;
     const hookX = canvasRect.left + (hookProjection.x * 0.5 + 0.5) * canvasRect.width;
     const hookY = canvasRect.top + (-hookProjection.y * 0.5 + 0.5) * canvasRect.height;
     const previous = lastMotion.current;
@@ -307,6 +316,7 @@ function Band({
         >
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
+            ref={cardVisual}
             scale={2.25}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => setHovered(true)}

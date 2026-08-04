@@ -1933,10 +1933,12 @@ function drawLanyardPath(anchorX, hookX, hookY, textureUrl = "") {
   }
 
   const safeHookY = Math.max(96, hookY);
-  const controlAY = safeHookY * 0.48;
-  const controlBY = safeHookY * 0.76;
-  const controlBX = anchorX + (hookX - anchorX) * 0.32;
-  const pathData = `M ${anchorX} 0 C ${anchorX} ${controlAY}, ${controlBX} ${controlBY}, ${hookX} ${safeHookY}`;
+  const horizontalTravel = hookX - anchorX;
+  const controlAX = anchorX + horizontalTravel * 0.32;
+  const controlAY = safeHookY * 0.32;
+  const controlBX = anchorX + horizontalTravel * 0.68;
+  const controlBY = safeHookY * 0.68;
+  const pathData = `M ${anchorX} 0 C ${controlAX} ${controlAY}, ${controlBX} ${controlBY}, ${hookX} ${safeHookY}`;
   const overlayHeight = Math.max(window.innerHeight, safeHookY + 48);
 
   strap.style.height = `${overlayHeight}px`;
@@ -1946,13 +1948,13 @@ function drawLanyardPath(anchorX, hookX, hookY, textureUrl = "") {
   band.setAttribute("d", pathData);
   shadow.setAttribute("d", pathData);
 
-  const logoStops = [0.2, 0.41, 0.62];
+  const logoStops = [0.2, 0.45, 0.7];
   strap.querySelectorAll("[data-lanyard-logo]").forEach((logo, index) => {
     if (!(logo instanceof HTMLElement)) return;
     const amount = logoStops[index] ?? 0.5;
-    const x = getCubicPoint(anchorX, anchorX, controlBX, hookX, amount);
+    const x = getCubicPoint(anchorX, controlAX, controlBX, hookX, amount);
     const y = getCubicPoint(0, controlAY, controlBY, safeHookY, amount);
-    const tangentX = getCubicTangent(anchorX, anchorX, controlBX, hookX, amount);
+    const tangentX = getCubicTangent(anchorX, controlAX, controlBX, hookX, amount);
     const tangentY = getCubicTangent(0, controlAY, controlBY, safeHookY, amount);
     const angle = Math.atan2(tangentY, tangentX) * (180 / Math.PI) - 90;
     logo.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${angle}deg)`;
