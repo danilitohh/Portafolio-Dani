@@ -3062,8 +3062,8 @@ body[data-preview-section="contact"] .footer {
 
 .hero__shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: clamp(1.5rem, 4vw, 4rem);
+  grid-template-columns: minmax(0, 1.18fr) minmax(290px, 0.82fr);
+  gap: clamp(1.25rem, 3vw, 3rem);
   align-items: start;
 }
 
@@ -3071,7 +3071,7 @@ body[data-preview-section="contact"] .footer {
   display: grid;
   gap: 1.1rem;
   align-content: center;
-  max-width: 64rem;
+  max-width: 58rem;
 }
 
 .hero__eyebrow,
@@ -3100,7 +3100,7 @@ body[data-preview-section="contact"] .footer {
 .hero__headline {
   display: grid;
   gap: 0.08em;
-  font-size: clamp(4rem, 9vw, 8.5rem);
+  font-size: clamp(3.55rem, 7.6vw, 7.2rem);
   line-height: 0.82;
 }
 
@@ -3257,14 +3257,14 @@ body[data-preview-section="contact"] .footer {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  margin-top: clamp(-1.8rem, -1.8vw, -0.5rem);
+  margin-top: clamp(-1.2rem, -1vw, -0.25rem);
   padding-top: 0;
 }
 
 .lanyard-shell {
   position: relative;
-  width: min(100%, 33.5rem);
-  height: min(49rem, 82svh);
+  width: min(100%, 31rem);
+  height: min(47rem, 80svh);
   margin: 0;
   overflow: visible;
   border-radius: 1.35rem;
