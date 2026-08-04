@@ -8,3 +8,6 @@ video-contact-sheet.png
 tmp_cv_images/
 validation/
 .chrome-profile*/
+node_modules/
+dist/
+.vite/

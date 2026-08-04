@@ -57,7 +57,8 @@ if (new URLSearchParams(location.search).has("resetIntro")) {
   }
 }
 
-const introSeenOnLoad = readSessionFlag(INTRO_STORAGE_KEY);
+const introSeenOnLoad =
+  readSessionFlag(INTRO_STORAGE_KEY) || new URLSearchParams(location.search).has("preview");
 
 const CONTENT = {
   es: {
@@ -1374,8 +1375,6 @@ function createAboutHighlightCard(item, index = 0) {
 }
 
 const PORTRAIT_IMAGE_FILE = "assets/portrait-danilo.png";
-const LANYARD_EMBED_URL = "lanyard-portrait.html?v=2026-08-04-14";
-
 function createPortraitCard(variant = "hero") {
   const role = PROFILE.role[currentLang];
   const eager = variant === "hero";
@@ -1383,13 +1382,11 @@ function createPortraitCard(variant = "hero") {
   if (variant === "hero") {
     return `
       <div class="lanyard-shell" aria-label="Retrato colgante de Danilo Herrera Hernández">
-        <iframe
-          class="lanyard-shell__frame"
-          src="${LANYARD_EMBED_URL}"
-          title="Retrato colgante de Danilo Herrera Hernández"
-          loading="eager"
-          allowtransparency="true"
-        ></iframe>
+        <lanyard-portrait
+          class="lanyard-shell__canvas"
+          role="img"
+          aria-label="Retrato interactivo colgante de Danilo Herrera Hernández"
+        ></lanyard-portrait>
       </div>
     `;
   }
@@ -2943,3 +2940,11 @@ function observeReveal() {
 }
 
 render();
+
+const loadInteractivePortrait = () => {
+  import("./src/lanyard/register.jsx").catch((error) => {
+    console.error("No se pudo cargar el retrato interactivo:", error);
+  });
+};
+
+loadInteractivePortrait();

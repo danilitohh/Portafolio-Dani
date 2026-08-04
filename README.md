@@ -14,6 +14,8 @@ Base de portafolio en JavaScript puro, pensada para mostrar:
 - `index.html`: entrada principal del sitio
 - `styles.css`: diseño, layout y responsive
 - `script.js`: contenido, traducciones y comportamiento
+- `src/lanyard/`: componente React Three Fiber del retrato colgante
+- `vite.config.js`: compilación de JavaScript, JSX y recursos `.glb`
 
 ## Cómo personalizar
 
@@ -24,17 +26,25 @@ Base de portafolio en JavaScript puro, pensada para mostrar:
 5. Ajusta las categorías de la sección de `Tecnologías` en `CONTENT.es/en` según tu stack real.
 6. Ajusta colores, tarjetas y secciones en `styles.css`.
 
-## Cómo abrirlo
+## Desarrollo local
 
-- Abre `index.html` directamente en el navegador, o
-- Sirve la carpeta con cualquier servidor estático si prefieres evitar `file://`.
+```bash
+npm install
+npm run dev
+```
+
+Para generar la versión de producción:
+
+```bash
+npm run build
+```
 
 ## Notas
 
 - El idioma se guarda en `localStorage`.
 - El formulario de contacto abre el cliente de correo sin necesitar backend.
 - La estructura está pensada para que puedas mover o duplicar secciones sin romper el diseño.
-- No requiere Node ni dependencias para funcionar en esta base inicial.
+- El contenido principal sigue escrito en JavaScript vanilla. React y Three.js se usan solamente para el colgante 3D interactivo.
 - Si dejas `image` vacío, la tarjeta mostrará un bloque guía hasta que subas tu captura.
 - Si dejas `liveUrl` vacío, la tarjeta mostrará solo el enlace al repositorio.
 
