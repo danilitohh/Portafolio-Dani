@@ -527,6 +527,8 @@ let pageRevealObserver = null;
 let activeSectionObserver = null;
 let scrollChromeFrame = 0;
 let lanyardStrapFrame = 0;
+let lanyardMotionFrame = 0;
+let pendingLanyardMotion = null;
 let scrollChromeBound = false;
 let activeSectionId = ACTIVE_SECTION_IDS[0];
 let introTimerId = 0;
@@ -1741,9 +1743,13 @@ function buildPageMarkup(copy, shouldShowIntro) {
     ${shouldShowIntro ? createIntroOverlay() : ""}
     <div class="page">
       <div class="lanyard-page-strap" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
+        <svg class="lanyard-page-strap__canvas" preserveAspectRatio="none">
+          <path class="lanyard-page-strap__shadow" data-lanyard-path-shadow></path>
+          <path class="lanyard-page-strap__band" data-lanyard-path></path>
+        </svg>
+        <span data-lanyard-logo></span>
+        <span data-lanyard-logo></span>
+        <span data-lanyard-logo></span>
       </div>
       <header class="topbar">
         <div class="shell topbar__inner">
@@ -1889,11 +1895,96 @@ function syncLanyardPageStrap() {
   const pageRect = page.getBoundingClientRect();
   const shellRect = shell.getBoundingClientRect();
   const centerX = shellRect.left - pageRect.left + shellRect.width / 2;
-  const height = Math.max(0, shellRect.top - pageRect.top + 52);
+  const fallbackHookY = shellRect.top - pageRect.top + shellRect.height * 0.24;
+  drawLanyardPath(centerX, centerX, fallbackHookY);
+}
 
-  strap.style.setProperty("--lanyard-strap-x", `${centerX}px`);
-  strap.style.setProperty("--lanyard-strap-height", `${height}px`);
+function getCubicPoint(start, controlA, controlB, end, amount) {
+  const inverse = 1 - amount;
+  return (
+    inverse ** 3 * start +
+    3 * inverse ** 2 * amount * controlA +
+    3 * inverse * amount ** 2 * controlB +
+    amount ** 3 * end
+  );
+}
+
+function getCubicTangent(start, controlA, controlB, end, amount) {
+  const inverse = 1 - amount;
+  return (
+    3 * inverse ** 2 * (controlA - start) +
+    6 * inverse * amount * (controlB - controlA) +
+    3 * amount ** 2 * (end - controlB)
+  );
+}
+
+function drawLanyardPath(anchorX, hookX, hookY, textureUrl = "") {
+  const strap = document.querySelector(".lanyard-page-strap");
+  const page = document.querySelector(".page");
+  const band = document.querySelector("[data-lanyard-path]");
+  const shadow = document.querySelector("[data-lanyard-path-shadow]");
+  if (
+    !(strap instanceof HTMLElement) ||
+    !(page instanceof HTMLElement) ||
+    !(band instanceof SVGPathElement) ||
+    !(shadow instanceof SVGPathElement)
+  ) {
+    return;
+  }
+
+  const safeHookY = Math.max(96, hookY);
+  const controlAY = safeHookY * 0.48;
+  const controlBY = safeHookY * 0.76;
+  const controlBX = anchorX + (hookX - anchorX) * 0.32;
+  const pathData = `M ${anchorX} 0 C ${anchorX} ${controlAY}, ${controlBX} ${controlBY}, ${hookX} ${safeHookY}`;
+  const overlayHeight = Math.max(window.innerHeight, safeHookY + 48);
+
+  strap.style.height = `${overlayHeight}px`;
+  if (textureUrl) {
+    strap.style.setProperty("--lanyard-texture", `url("${textureUrl}")`);
+  }
+  band.setAttribute("d", pathData);
+  shadow.setAttribute("d", pathData);
+
+  const logoStops = [0.2, 0.41, 0.62];
+  strap.querySelectorAll("[data-lanyard-logo]").forEach((logo, index) => {
+    if (!(logo instanceof HTMLElement)) return;
+    const amount = logoStops[index] ?? 0.5;
+    const x = getCubicPoint(anchorX, anchorX, controlBX, hookX, amount);
+    const y = getCubicPoint(0, controlAY, controlBY, safeHookY, amount);
+    const tangentX = getCubicTangent(anchorX, anchorX, controlBX, hookX, amount);
+    const tangentY = getCubicTangent(0, controlAY, controlBY, safeHookY, amount);
+    const angle = Math.atan2(tangentY, tangentX) * (180 / Math.PI) - 90;
+    logo.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${angle}deg)`;
+  });
+
   strap.classList.add("is-positioned");
+}
+
+function handleLanyardMotion(event) {
+  if (!(event instanceof CustomEvent) || !event.detail) {
+    return;
+  }
+
+  pendingLanyardMotion = event.detail;
+  if (lanyardMotionFrame) {
+    return;
+  }
+
+  lanyardMotionFrame = window.requestAnimationFrame(() => {
+    lanyardMotionFrame = 0;
+    const motion = pendingLanyardMotion;
+    pendingLanyardMotion = null;
+    const page = document.querySelector(".page");
+    if (!(page instanceof HTMLElement) || !motion) return;
+    const pageRect = page.getBoundingClientRect();
+    drawLanyardPath(
+      motion.anchorX - pageRect.left,
+      motion.hookX - pageRect.left,
+      motion.hookY - pageRect.top,
+      motion.textureUrl,
+    );
+  });
 }
 
 function syncScrollChrome() {
@@ -1921,6 +2012,7 @@ function bindScrollChrome() {
   window.addEventListener("orientationchange", syncShowcaseTabs, { passive: true });
   window.addEventListener("resize", scheduleLanyardStrapSync, { passive: true });
   window.addEventListener("orientationchange", scheduleLanyardStrapSync, { passive: true });
+  window.addEventListener("portfolio-lanyard-motion", handleLanyardMotion);
 }
 
 function setupActiveSectionObserver() {

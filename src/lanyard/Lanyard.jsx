@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, extend, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, useGLTF, useTexture } from "@react-three/drei";
 import {
   BallCollider,
@@ -10,15 +10,12 @@ import {
   useRopeJoint,
   useSphericalJoint,
 } from "@react-three/rapier";
-import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import * as THREE from "three";
 
 import cardGLB from "../../assets/lanyard/card.glb";
 import defaultLanyardImage from "../../assets/lanyard/lanyard.png";
 import portraitImage from "../../assets/portrait-danilo.png";
 import "./Lanyard.css";
-
-extend({ MeshLineGeometry, MeshLineMaterial });
 
 const BLANK_PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
@@ -110,8 +107,6 @@ export default function Lanyard({
 }
 
 function Band({
-  maxSpeed = 50,
-  minSpeed = 0,
   isMobile = false,
   frontImage,
   backImage,
@@ -119,7 +114,6 @@ function Band({
   lanyardImage,
   lanyardWidth,
 }) {
-  const band = useRef();
   const fixed = useRef();
   const j1 = useRef();
   const j2 = useRef();
@@ -130,6 +124,11 @@ function Band({
   const ang = useMemo(() => new THREE.Vector3(), []);
   const rot = useMemo(() => new THREE.Vector3(), []);
   const dir = useMemo(() => new THREE.Vector3(), []);
+  const anchorProjection = useMemo(() => new THREE.Vector3(), []);
+  const hookProjection = useMemo(() => new THREE.Vector3(), []);
+  const hookOffset = useMemo(() => new THREE.Vector3(), []);
+  const cardRotation = useMemo(() => new THREE.Quaternion(), []);
+  const lastMotion = useRef({ anchorX: Number.NaN, hookX: Number.NaN, hookY: Number.NaN });
   const segmentProps = {
     type: "dynamic",
     canSleep: true,
@@ -138,7 +137,6 @@ function Band({
     linearDamping: 4,
   };
   const { nodes, materials } = useGLTF(cardGLB);
-  const texture = useTexture(lanyardImage || defaultLanyardImage);
   const frontTexture = useTexture(frontImage || BLANK_PIXEL);
   const backTexture = useTexture(backImage || BLANK_PIXEL);
 
@@ -204,15 +202,6 @@ function Band({
     [cardMap, materials.base.map],
   );
 
-  const [curve] = useState(
-    () =>
-      new THREE.CatmullRomCurve3([
-        new THREE.Vector3(),
-        new THREE.Vector3(),
-        new THREE.Vector3(),
-        new THREE.Vector3(),
-      ]),
-  );
   const [dragged, setDragged] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -232,7 +221,7 @@ function Band({
     };
   }, [hovered, dragged]);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (dragged) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
@@ -245,35 +234,52 @@ function Band({
       });
     }
 
-    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current || !band.current) return;
+    if (!fixed.current || !j1.current || !j2.current || !j3.current || !card.current) return;
 
     if (!hasStartedSwing.current) {
       hasStartedSwing.current = true;
       card.current.applyTorqueImpulse({ x: 0, y: isMobile ? 0.003 : 0.008, z: 0 }, true);
     }
 
-    [j1, j2].forEach((ref) => {
-      if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-      const distance = ref.current.lerped.distanceTo(ref.current.translation());
-      const clampedDistance = Math.max(0.1, Math.min(1, distance));
-      ref.current.lerped.lerp(
-        ref.current.translation(),
-        delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)),
-      );
-    });
-
-    curve.points[0].copy(j3.current.translation());
-    curve.points[1].copy(j2.current.lerped);
-    curve.points[2].copy(j1.current.lerped);
-    curve.points[3].copy(fixed.current.translation());
-    band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
     ang.copy(card.current.angvel());
     rot.copy(card.current.rotation());
     card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
-  });
 
-  curve.curveType = "chordal";
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    const fixedPosition = fixed.current.translation();
+    const cardPosition = card.current.translation();
+    cardRotation.copy(card.current.rotation());
+    hookOffset.set(0, 1.5, 0).applyQuaternion(cardRotation);
+    anchorProjection.set(fixedPosition.x, fixedPosition.y, fixedPosition.z).project(state.camera);
+    hookProjection
+      .set(cardPosition.x, cardPosition.y, cardPosition.z)
+      .add(hookOffset)
+      .project(state.camera);
+
+    const canvasRect = state.gl.domElement.getBoundingClientRect();
+    const anchorX = canvasRect.left + (anchorProjection.x * 0.5 + 0.5) * canvasRect.width;
+    const hookX = canvasRect.left + (hookProjection.x * 0.5 + 0.5) * canvasRect.width;
+    const hookY = canvasRect.top + (-hookProjection.y * 0.5 + 0.5) * canvasRect.height;
+    const previous = lastMotion.current;
+
+    if (
+      Math.abs(previous.anchorX - anchorX) > 0.25 ||
+      Math.abs(previous.hookX - hookX) > 0.25 ||
+      Math.abs(previous.hookY - hookY) > 0.25
+    ) {
+      lastMotion.current = { anchorX, hookX, hookY };
+      window.dispatchEvent(
+        new CustomEvent("portfolio-lanyard-motion", {
+          detail: {
+            anchorX,
+            hookX,
+            hookY,
+            textureUrl: lanyardImage || defaultLanyardImage,
+            width: lanyardWidth,
+          },
+        }),
+      );
+    }
+  });
 
   const releaseCard = (event) => {
     event.target.releasePointerCapture(event.pointerId);
@@ -327,19 +333,6 @@ function Band({
           </group>
         </RigidBody>
       </group>
-      <mesh ref={band} position={[0, 0, -0.2]}>
-        <meshLineGeometry />
-        <meshLineMaterial
-          color="white"
-          depthTest
-          depthWrite={false}
-          resolution={[1000, 1000]}
-          useMap
-          map={texture}
-          repeat={[-4, 1]}
-          lineWidth={lanyardWidth}
-        />
-      </mesh>
     </>
   );
 }
